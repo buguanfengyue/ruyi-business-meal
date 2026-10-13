@@ -1,0 +1,9 @@
+{
+  "name": "ruyi-business-meal-replica",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {"dev": "vite --host 127.0.0.1", "api": "node server/mock-server.mjs", "test:api": "node scripts/smoke-api.mjs", "test:auth": "node scripts/smoke-auth.mjs", "build": "vite build", "preview": "vite preview --host 127.0.0.1"},
+  "dependencies": {"@vitejs/plugin-react": "latest", "vite": "latest", "react": "latest", "react-dom": "latest", "lucide-react": "latest"},
+  "devDependencies": {}
+}
