@@ -27,11 +27,18 @@ function normalizePhone(value) {
  * only. Never put WECHAT_APPSECRET in Vite or mini-program client code.
  */
 export function createWechatAuth({ env = process.env, state, logger = console } = {}) {
-  const mode = String(env.WECHAT_AUTH_MODE || 'mock').toLowerCase() === 'wechat' ? 'wechat' : 'mock';
+  const configuredMode = String(env.WECHAT_AUTH_MODE || 'mock').trim().toLowerCase();
+  if (!['mock', 'wechat'].includes(configuredMode)) {
+    throw authError(500, 'INVALID_WECHAT_AUTH_MODE', 'WECHAT_AUTH_MODE 必须是 mock 或 wechat');
+  }
+  // Fail closed on typos: silently treating an unknown value as mock would
+  // make it possible to deploy a public endpoint with fake authentication.
+  const mode = configuredMode;
   const appId = String(env.WECHAT_APPID || '').trim();
   const appSecret = String(env.WECHAT_APPSECRET || '').trim();
   const apiBase = String(env.WECHAT_API_BASE_URL || DEFAULT_WECHAT_API).replace(/\/$/, '');
-  const ttlSeconds = Math.max(300, Number(env.WECHAT_AUTH_TTL_SECONDS || 7200));
+  const configuredTtl = Number(env.WECHAT_AUTH_TTL_SECONDS || 7200);
+  const ttlSeconds = Number.isFinite(configuredTtl) ? Math.max(300, Math.floor(configuredTtl)) : 7200;
   const sessions = new Map();
   let accessTokenCache = null;
 
