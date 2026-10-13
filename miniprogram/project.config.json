@@ -1,0 +1,17 @@
+{
+  "description": "如一商务餐原生小程序壳",
+  "compileType": "miniprogram",
+  "miniprogramRoot": "./",
+  "projectname": "ruyi-business-meal",
+  "appid": "",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "minified": true,
+    "postcss": true,
+    "minifyWXSS": true,
+    "minifyWXML": true
+  },
+  "condition": {}
+}

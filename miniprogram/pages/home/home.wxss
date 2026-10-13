@@ -1,0 +1,12 @@
+.hero { min-height: 170rpx; background: linear-gradient(135deg, #fff, #fff7ed); }
+.title { font-size: 42rpx; letter-spacing: 4rpx; }
+.subtitle, .status-line { color: #999; margin-top: 12rpx; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 18rpx; padding: 16rpx 0; }
+.user-card .row { border-bottom: 1rpx solid #f0f0f0; }
+.user-card button { margin-top: 20rpx; }
+.error { color: #b42318; background: #fff1f0; }
+.section-title { font-weight: 700; font-size: 32rpx; margin-bottom: 8rpx; }
+.product { border-top: 1rpx solid #f0f0f0; }
+.product-left { display: flex; align-items: center; gap: 16rpx; flex: 1; min-width: 0; }
+.emoji { font-size: 48rpx; }
+.price { color: #d91e26; font-weight: 700; }

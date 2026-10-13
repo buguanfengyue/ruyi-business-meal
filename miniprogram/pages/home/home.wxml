@@ -1,0 +1,26 @@
+<view class="page">
+  <view class="hero card">
+    <view class="brand title">如一商务餐</view>
+    <view class="subtitle">本地原生小程序联调壳</view>
+    <view class="status-line">授权模式：{{authMode || '读取中'}}</view>
+  </view>
+
+  <view wx:if="{{error}}" class="card error">{{error}}</view>
+
+  <view class="card user-card">
+    <view class="row"><text>用户</text><text>{{user.nickname || '未登录'}}</text></view>
+    <view class="row"><text>手机号</text><text>{{user.phone || '未绑定'}}</text></view>
+    <button class="primary" bindtap="goAuth">微信授权 / 登录</button>
+  </view>
+
+  <view class="card">
+    <view class="section-title">商品</view>
+    <view wx:if="{{loading}}" class="muted">正在读取本地 API…</view>
+    <block wx:for="{{products}}" wx:key="id">
+      <view class="product row">
+        <view class="product-left"><text class="emoji">{{item.emoji}}</text><view><view>{{item.name}}</view><view class="muted">{{item.description}}</view></view></view>
+        <text class="price">¥{{item.price}}</text>
+      </view>
+    </block>
+  </view>
+</view>

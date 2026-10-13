@@ -1,0 +1,4 @@
+.intro { min-height: 170rpx; }
+.title { font-size: 42rpx; margin-bottom: 20rpx; }
+.card button { margin-bottom: 18rpx; }
+.message { color: #555; text-align: center; padding-top: 8rpx; }
