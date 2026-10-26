@@ -3,7 +3,8 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "scripts": {"dev": "vite --host 127.0.0.1", "api": "node server/mock-server.mjs", "test:api": "node scripts/smoke-api.mjs", "test:auth": "node scripts/smoke-auth.mjs", "build": "vite build", "preview": "vite preview --host 127.0.0.1"},
+  "scripts": {"dev": "vite --host 127.0.0.1", "api": "node --env-file-if-exists=.env server/index.mjs", "admin:create": "node --env-file-if-exists=.env scripts/admin.mjs create", "admin:password": "node --env-file-if-exists=.env scripts/admin.mjs password", "db:backup": "node --env-file-if-exists=.env scripts/backup-db.mjs", "test:api": "node scripts/smoke-api.mjs", "test:auth": "node scripts/smoke-auth.mjs", "test:flow": "node scripts/smoke-flow.mjs", "test:admin": "node scripts/smoke-admin.mjs", "test:pay": "node scripts/smoke-wechatpay.mjs", "test:mp": "node scripts/smoke-miniprogram.mjs", "test": "node scripts/smoke-api.mjs && node scripts/smoke-auth.mjs && node scripts/smoke-flow.mjs && node scripts/smoke-admin.mjs && node scripts/smoke-wechatpay.mjs && node scripts/smoke-miniprogram.mjs", "build": "vite build", "preview": "vite preview --host 127.0.0.1"},
   "dependencies": {"@vitejs/plugin-react": "6.1.2", "vite": "8.3.4", "react": "19.3.0", "react-dom": "19.3.0", "lucide-react": "1.55.0"},
-  "devDependencies": {}
+  "devDependencies": {},
+  "engines": {"node": ">=22.13"}
 }

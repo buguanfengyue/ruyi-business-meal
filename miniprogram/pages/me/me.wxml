@@ -1,0 +1,26 @@
+<view class="profile" bindtap="tapProfile">
+  <view class="avatar">{{avatarText}}</view>
+  <view class="profile-main"><view class="name">{{user.registered ? user.nickname : '未授权'}}</view><view class="label">{{phoneText}}</view></view>
+  <text wx:if="{{user && !user.registered}}" class="red hint">点击注册 ›</text>
+</view>
+<navigator class="member" url="/pages/member/member"><text>👑 {{memberName}}</text><text class="member-more">查看详情 ›</text></navigator>
+<view class="balance">
+  <view>账户余额</view><view class="balance-num">{{balanceText}}</view>
+  <navigator class="recharge" url="/pages/info/info?kind=recharge">充值</navigator>
+</view>
+<view class="list">
+  <view wx:for="{{rows}}" wx:key="title" class="row" data-url="{{item.url}}" data-tab="{{item.tab}}" bindtap="go">
+    <text>{{item.title}}</text><text class="label">{{item.value}} ›</text>
+  </view>
+  <view class="row" bindtap="callStore"><text>📞 联系商家</text><text class="label">{{storePhone}} ›</text></view>
+</view>
+
+<view wx:if="{{showRegister}}" class="mask" bindtap="skipRegister">
+  <view class="sheet register" catchtap="noop">
+    <view class="register-title">欢迎加入如一商务餐</view>
+    <view class="label">注册后可同步订单、积分和优惠券</view>
+    <input class="register-input" type="nickname" placeholder="请输入昵称" maxlength="30" value="{{nickname}}" bindinput="onNickname" bindblur="onNickname" />
+    <button class="btn-red" loading="{{registering}}" bindtap="register">快速注册</button>
+    <view class="skip" bindtap="skipRegister">暂时跳过</view>
+  </view>
+</view>

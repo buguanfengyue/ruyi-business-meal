@@ -1,0 +1,44 @@
+<view class="seg">
+  <view wx:for="{{tabs}}" wx:key="id" class="{{tab === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="pickTab">{{item.label}}</view>
+</view>
+<view wx:if="{{loading}}" class="empty">加载中…</view>
+<view wx:elif="{{!list.length}}" class="empty">暂无优惠券</view>
+<view wx:else class="list">
+  <view wx:for="{{list}}" wx:key="id" class="coupon {{item.status}}">
+    <view class="corner">▦</view>
+    <view class="top">
+      <view class="top-left"><view class="title">{{item.title}}</view><view class="label">{{item.range}}</view></view>
+      <view class="top-right"><view class="amt"><text class="yen">¥</text>{{item.amountText}}</view><view class="label">满¥{{item.thresholdText}}可用</view></view>
+    </view>
+    <view class="bottom">
+      <text class="label" data-id="{{item.id}}" bindtap="toggleRule">使用规则 {{open[item.id] ? '▴' : '▾'}}</text>
+      <text wx:if="{{item.status === 'available'}}" class="red" bindtap="use">立即使用</text>
+      <block wx:elif="{{item.status === 'gifted'}}">
+        <text wx:if="{{item.claimed}}" class="label">好友已领取</text>
+        <button wx:else class="share-mini" open-type="share" data-code="{{item.giftCode}}">兑换码 {{item.giftCode}} · 分享</button>
+      </block>
+      <text wx:else class="label">{{item.statusText}}</text>
+    </view>
+    <view wx:if="{{open[item.id]}}" class="rule">订单金额（会员价）满¥{{item.thresholdText}}可用，每单限用一张，不与其他优惠券叠加。</view>
+  </view>
+</view>
+
+<view class="actions"><view class="outline" bindtap="gift">转赠给好友</view><view class="solid" bindtap="openRedeem">兑换码</view></view>
+
+<view wx:if="{{giftCode}}" class="mask center" bindtap="closeGift">
+  <view class="dialog" catchtap="noop">
+    <view class="d-title">转赠成功</view>
+    <view class="label">分享给好友，或把兑换码发给好友在「券包 → 兑换码」中领取</view>
+    <view class="code">{{giftCode}}</view>
+    <button class="btn-red" open-type="share">分享给好友</button>
+    <view class="d-link" bindtap="copyGift">复制兑换码</view>
+  </view>
+</view>
+
+<view wx:if="{{redeeming}}" class="mask center" bindtap="closeRedeem">
+  <view class="dialog" catchtap="noop">
+    <view class="d-title">输入兑换码</view>
+    <input class="code-input" placeholder="请输入兑换码" value="{{code}}" bindinput="onCode" focus />
+    <button class="btn-red" bindtap="redeem">兑换</button>
+  </view>
+</view>

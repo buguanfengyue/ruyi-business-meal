@@ -1,26 +1,26 @@
-<view class="page">
-  <view class="hero card">
-    <view class="brand title">如一商务餐</view>
-    <view class="subtitle">本地原生小程序联调壳</view>
-    <view class="status-line">授权模式：{{authMode || '读取中'}}</view>
+<view class="hero">
+  <view class="hero-art">
+    <view class="hero-copy"><text class="hero-name">如一</text><text class="hero-sub">商务餐</text></view>
+    <view class="hero-food">🍱🥗🍉</view>
   </view>
-
-  <view wx:if="{{error}}" class="card error">{{error}}</view>
-
-  <view class="card user-card">
-    <view class="row"><text>用户</text><text>{{user.nickname || '未登录'}}</text></view>
-    <view class="row"><text>手机号</text><text>{{user.phone || '未绑定'}}</text></view>
-    <button class="primary" bindtap="goAuth">微信授权 / 登录</button>
+  <view class="account" bindtap="goMe">
+    <view class="avatar">{{avatarText}}</view>
+    <view class="account-main"><view class="bold">{{user.registered ? user.nickname : '未授权'}}</view><view>{{user.phone || '未绑定手机号'}}</view></view>
+    <view class="metric"><view class="bold">{{balanceText}}</view><view>余额</view></view>
+    <view class="metric"><view class="bold">{{user.availableCoupons || 0}}</view><view>可用券</view></view>
   </view>
+</view>
 
-  <view class="card">
-    <view class="section-title">商品</view>
-    <view wx:if="{{loading}}" class="muted">正在读取本地 API…</view>
-    <block wx:for="{{products}}" wx:key="id">
-      <view class="product row">
-        <view class="product-left"><text class="emoji">{{item.emoji}}</text><view><view>{{item.name}}</view><view class="muted">{{item.description}}</view></view></view>
-        <text class="price">¥{{item.price}}</text>
-      </view>
-    </block>
+<view class="content">
+  <view wx:if="{{error}}" class="card error" bindtap="load">{{error}}（点击重试）</view>
+  <view class="delivery" bindtap="goMenu"><view class="delivery-title">外卖订餐</view><view class="muted">delivery</view></view>
+  <view class="grid">
+    <view class="feature" data-kind="wechat" bindtap="goInfo"><text class="icon">▦</text><text class="bold">老板微信</text></view>
+    <view class="feature" data-url="/pages/invite/invite" bindtap="goPage"><text class="icon">🎁</text><text class="bold">推荐朋友</text><text class="tiny">INVITE</text></view>
+    <view class="feature" bindtap="callStore"><text class="icon">📞</text><text class="bold">订餐电话</text><text class="tiny">{{store.phone}}</text></view>
+    <view class="feature" data-url="/pages/partner/partner" bindtap="goPage"><text class="icon">👥</text><text class="bold">共享股东</text><text class="tiny">COUPON</text></view>
+    <view class="feature" data-kind="mall" bindtap="goInfo"><text class="icon">🪙</text><text class="bold">积分商城</text><text class="tiny">COUPON</text></view>
   </view>
+  <view class="banner"><text class="banner-title">科技让美味</text><text>[随手可得]</text></view>
+  <view class="tech">餐帮提供技术支持 ></view>
 </view>

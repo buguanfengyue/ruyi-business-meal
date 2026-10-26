@@ -1,0 +1,16 @@
+.tabs { display: flex; background: #fff; height: 92rpx; border-bottom: 1rpx solid #eee; }
+.tab { flex: 1; text-align: center; line-height: 92rpx; font-size: 28rpx; position: relative; }
+.tab.active { font-weight: 700; }
+.tab.active::after { content: ''; position: absolute; bottom: 0; left: 24%; right: 24%; height: 4rpx; background: #d91e26; }
+.list { padding: 20rpx 24rpx; }
+.order { display: flex; flex-direction: column; gap: 16rpx; }
+.head, .foot { display: flex; justify-content: space-between; align-items: baseline; }
+.summary { color: #555; font-size: 26rpx; line-height: 1.5; }
+.foot { color: #999; font-size: 24rpx; }
+.bold { font-weight: 700; color: #222; }
+.big { font-size: 32rpx; margin-left: 6rpx; }
+.empty-icon { font-size: 140rpx; color: #ddd; }
+.status-pending_payment { color: #d91e26; }
+.status-paid { color: #e07a10; }
+.status-completed { color: #2f8f46; }
+.status-cancelled { color: #999; }

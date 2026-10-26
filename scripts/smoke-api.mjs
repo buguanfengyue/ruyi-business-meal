@@ -7,9 +7,9 @@ import path from 'node:path';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const port = 8788;
 const base = `http://127.0.0.1:${port}`;
-const child = spawn(process.execPath, ['server/mock-server.mjs'], {
+const child = spawn(process.execPath, ['server/index.mjs'], {
   cwd: root,
-  env: { ...process.env, RUYI_API_PORT: String(port) },
+  env: { ...process.env, DATABASE_PATH: ':memory:', RUYI_API_PORT: String(port) },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 
@@ -59,7 +59,7 @@ try {
   assert.equal(order.response.status, 201);
   assert.match(order.body.order.id, /^RY/);
   assert.equal(order.body.order.items.length, 2);
-  assert.equal(order.body.order.totals.total, 101.16);
+  assert.equal(order.body.order.totals.total, 101.92);
 
   const orders = await request('/api/orders');
   assert.equal(orders.response.status, 200);

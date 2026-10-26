@@ -4,7 +4,7 @@
     <view class="muted">本地开发阶段使用 mock；切换正式环境后，code 由服务端调用微信接口完成授权。</view>
   </view>
   <view class="card">
-    <button class="primary" bindtap="login" loading="{{loading}}">{{loggedIn ? '已登录' : '微信登录'}}</button>
+    <button class="primary" bindtap="login" loading="{{loading}}">{{loggedIn ? '重新登录' : '微信登录'}}</button>
     <button wx:if="{{loggedIn}}" open-type="getPhoneNumber" bindgetphonenumber="onGetPhoneNumber">授权手机号</button>
     <view wx:if="{{message}}" class="message">{{message}}</view>
   </view>

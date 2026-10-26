@@ -1,0 +1,14 @@
+<view class="list">
+  <view wx:for="{{addresses}}" wx:key="id" class="card item">
+    <view class="main"><view class="bold">{{item.name}}　{{item.phone}}</view><view class="label">{{item.detail}}</view></view>
+    <text class="label del" data-id="{{item.id}}" bindtap="remove">删除</text>
+  </view>
+  <view wx:if="{{!loading && !addresses.length && !editing}}" class="empty">还没有收货地址</view>
+</view>
+<view wx:if="{{editing}}" class="card form">
+  <input placeholder="联系人" maxlength="20" value="{{form.name}}" data-field="name" bindinput="onInput" />
+  <input placeholder="手机号" type="number" maxlength="11" value="{{form.phone}}" data-field="phone" bindinput="onInput" />
+  <textarea placeholder="详细地址（楼栋、门牌号）" maxlength="100" auto-height value="{{form.detail}}" data-field="detail" bindinput="onInput" />
+  <view class="actions"><button class="btn-ghost" bindtap="cancelAdd">取消</button><button class="btn-red" loading="{{saving}}" bindtap="save">保存</button></view>
+</view>
+<button wx:else class="btn-red add" bindtap="startAdd">+ 新增地址</button>

@@ -1,0 +1,25 @@
+<view class="hero">
+  <view class="art">🧧💰🎁</view>
+  <view class="call"><view class="c1">点击下方</view><view class="c2">邀请好友</view><view>↓</view></view>
+</view>
+<view wx:if="{{!data}}" class="empty">加载中…</view>
+<block wx:else>
+  <view class="panel">
+    <button class="share" open-type="share">邀请好友</button>
+    <view class="h">新用户将获得</view>
+    <view class="coupon">
+      <view class="left"><view class="amt"><text class="yen">¥</text>{{data.newUserReward.amountText}}</view><view class="tiny">满¥{{data.newUserReward.thresholdText}}可用</view></view>
+      <view class="right"><view>{{data.newUserReward.title}} × {{data.newUserReward.count}}张</view><view class="label">领取后{{data.newUserReward.validDays}}天内有效</view></view>
+    </view>
+    <view class="h">每邀请 1 个用户可获得</view>
+    <view class="coupon">
+      <view class="left"><view class="amt"><text class="yen">¥</text>{{data.inviterReward.amountText}}</view><view class="tiny">满¥{{data.inviterReward.thresholdText}}可用</view></view>
+      <view class="right"><view>{{data.inviterReward.title}} × {{data.inviterReward.count}}张</view><view class="label">领取后{{data.inviterReward.validDays}}天内有效</view></view>
+    </view>
+  </view>
+  <view class="panel">
+    <view class="seg"><view class="{{tab === 0 ? 'on' : ''}}" data-tab="0" bindtap="pickTab">已邀请 {{data.invited.length}} 人</view><view class="{{tab === 1 ? 'on' : ''}}" data-tab="1" bindtap="pickTab">无效 {{data.invalid.length}} 人</view></view>
+    <view wx:for="{{rows}}" wx:key="invitedAt" class="trow"><text>{{item.nickname}}</text><text>{{item.timeText}}</text></view>
+    <view wx:if="{{!rows.length}}" class="empty small-empty">还没有邀请到好友</view>
+  </view>
+</block>

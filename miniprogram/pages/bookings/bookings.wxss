@@ -1,0 +1,3 @@
+.list { padding: 24rpx; }
+.bold { font-weight: 700; }
+.summary { color: #555; font-size: 26rpx; padding: 12rpx 0; }

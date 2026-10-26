@@ -16,3 +16,9 @@ coverage/
 *.pfx
 credentials*.json
 secrets*.json
+
+# Local database and backups (contain customer data).
+data/
+*.db
+*.db-wal
+*.db-shm

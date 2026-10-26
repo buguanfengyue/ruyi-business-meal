@@ -1,86 +1,66 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
+import { httpError } from './http.mjs';
 
-const DEFAULT_WECHAT_API = 'https://api.weixin.qq.com';
-
-function authError(status, code, message) {
-  const error = new Error(message);
-  error.status = status;
-  error.code = code;
-  return error;
-}
+export const hashToken = (token) => createHash('sha256').update(token).digest('hex');
 
 function bearerToken(req) {
   const value = String(req.headers.authorization || '');
   return value.startsWith('Bearer ') ? value.slice(7).trim() : '';
 }
 
-function normalizePhone(value) {
-  const phone = String(value || '').trim();
-  return /^1\d{10}$/.test(phone) ? phone : '';
-}
+const normalizePhone = (value) => (/^1\d{10}$/.test(String(value || '').trim()) ? String(value).trim() : '');
 
 /**
- * Server-side WeChat auth adapter.
+ * Server-side WeChat login. Sessions are random tokens; only their SHA-256
+ * hash is stored, so a leaked database cannot be replayed as logins.
  *
- * Local development intentionally defaults to mock mode. In production set
- * WECHAT_AUTH_MODE=wechat, WECHAT_APPID and WECHAT_APPSECRET on the server
- * only. Never put WECHAT_APPSECRET in Vite or mini-program client code.
+ * mock mode: any code logs in as the demo user; `mock:<name>` simulates a
+ * distinct WeChat user. wechat mode: code -> jscode2session -> openid, and
+ * the same openid always maps to the same user row.
  */
-export function createWechatAuth({ env = process.env, state, logger = console } = {}) {
-  const configuredMode = String(env.WECHAT_AUTH_MODE || 'mock').trim().toLowerCase();
-  if (!['mock', 'wechat'].includes(configuredMode)) {
-    throw authError(500, 'INVALID_WECHAT_AUTH_MODE', 'WECHAT_AUTH_MODE 必须是 mock 或 wechat');
-  }
-  // Fail closed on typos: silently treating an unknown value as mock would
-  // make it possible to deploy a public endpoint with fake authentication.
-  const mode = configuredMode;
-  const appId = String(env.WECHAT_APPID || '').trim();
-  const appSecret = String(env.WECHAT_APPSECRET || '').trim();
-  const apiBase = String(env.WECHAT_API_BASE_URL || DEFAULT_WECHAT_API).replace(/\/$/, '');
-  const configuredTtl = Number(env.WECHAT_AUTH_TTL_SECONDS || 7200);
-  const ttlSeconds = Number.isFinite(configuredTtl) ? Math.max(300, Math.floor(configuredTtl)) : 7200;
-  const sessions = new Map();
+export function createWechatAuth({ config, db, services, logger = console }) {
+  const { mode, appId, appSecret, apiBase, ttlSeconds, mockPhone } = config.auth;
   let accessTokenCache = null;
 
-  function assertWechatConfig() {
-    if (!appId || !appSecret) {
-      throw authError(503, 'WECHAT_CONFIG_MISSING', '正式微信授权尚未配置 WECHAT_APPID/WECHAT_APPSECRET');
-    }
-  }
-
-  function issueSession(user) {
-    const token = `ruyi_${randomUUID().replaceAll('-', '')}`;
+  function issueSession(user, created = false) {
+    const token = `ruyi_${randomBytes(24).toString('hex')}`;
     const expiresAt = Date.now() + ttlSeconds * 1000;
-    sessions.set(token, { user: { ...user }, expiresAt });
-    return { token, expiresAt: new Date(expiresAt).toISOString(), user: { ...user } };
+    db.run('INSERT INTO sessions (token_hash, user_id, expires_at, created_at) VALUES (:hash, :userId, :expiresAt, :now)', {
+      hash: hashToken(token), userId: user.id, expiresAt, now: new Date().toISOString(),
+    });
+    return { token, expiresAt: new Date(expiresAt).toISOString(), user, created };
   }
 
   function getSession(token) {
     if (!token) return null;
-    const session = sessions.get(token);
-    if (!session) return null;
-    if (session.expiresAt <= Date.now()) {
-      sessions.delete(token);
+    const row = db.one('SELECT * FROM sessions WHERE token_hash = :hash', { hash: hashToken(token) });
+    if (!row) return null;
+    const user = services.getUser(row.user_id);
+    if (row.expires_at <= Date.now() || !user) {
+      db.run('DELETE FROM sessions WHERE token_hash = :hash', { hash: row.token_hash });
       return null;
     }
-    return { ...session, token };
+    return { token, user, expiresAt: row.expires_at };
   }
 
   async function wechatJson(path, options = {}) {
-    const response = await fetch(`${apiBase}${path}`, options);
+    let response;
+    try {
+      response = await fetch(`${apiBase}${path}`, { ...options, signal: AbortSignal.timeout(8000) });
+    } catch (cause) {
+      logger.error?.('[wechat-auth] request failed', cause.message);
+      throw httpError(502, 'WECHAT_API_UNREACHABLE', '微信接口暂时无法访问，请稍后重试');
+    }
     const payload = await response.json().catch(() => ({}));
     if (!response.ok || Number(payload.errcode || 0) !== 0) {
       const code = Number(payload.errcode || response.status || 500);
-      throw authError(502, 'WECHAT_API_ERROR', `微信接口调用失败（${code}）`);
+      throw httpError(502, 'WECHAT_API_ERROR', `微信接口调用失败（${code}）`);
     }
     return payload;
   }
 
   async function getAccessToken() {
-    assertWechatConfig();
-    if (accessTokenCache && accessTokenCache.expiresAt > Date.now() + 30_000) {
-      return accessTokenCache.value;
-    }
+    if (accessTokenCache && accessTokenCache.expiresAt > Date.now() + 60_000) return accessTokenCache.value;
     const query = new URLSearchParams({ grant_type: 'client_credential', appid: appId, secret: appSecret });
     const payload = await wechatJson(`/cgi-bin/token?${query}`);
     accessTokenCache = { value: payload.access_token, expiresAt: Date.now() + Number(payload.expires_in || 7200) * 1000 };
@@ -89,84 +69,54 @@ export function createWechatAuth({ env = process.env, state, logger = console } 
 
   async function login(code) {
     const loginCode = String(code || '').trim();
-    if (!loginCode || loginCode.length > 512) {
-      throw authError(400, 'INVALID_LOGIN_CODE', 'wx.login 返回的 code 无效');
-    }
+    if (!loginCode || loginCode.length > 512) throw httpError(400, 'INVALID_LOGIN_CODE', 'wx.login 返回的 code 无效');
 
     if (mode === 'mock') {
-      return issueSession({
-        id: state.user.id,
-        nickname: state.user.nickname,
-        phone: state.user.phone,
-        registered: state.user.registered,
-        balance: state.user.balance,
-        points: state.user.points,
-        availableCoupons: state.user.availableCoupons,
-        authMode: 'mock',
-      });
+      const named = loginCode.match(/^mock:([A-Za-z0-9_-]{1,32})$/);
+      const id = named ? `mock_${named[1]}` : 'demo-user';
+      const existing = services.getUser(id);
+      if (existing) return issueSession(existing, false);
+      return issueSession(services.createUser({ id, authMode: 'mock', phone: named ? '' : mockPhone }), true);
     }
 
-    assertWechatConfig();
-    const query = new URLSearchParams({
-      appid: appId,
-      secret: appSecret,
-      js_code: loginCode,
-      grant_type: 'authorization_code',
-    });
+    const query = new URLSearchParams({ appid: appId, secret: appSecret, js_code: loginCode, grant_type: 'authorization_code' });
     const payload = await wechatJson(`/sns/jscode2session?${query}`);
-    // Keep openid/unionid server-side in the session. Do not expose them to
-    // the browser UI or write them to logs.
-    return issueSession({
-      id: `wx_${randomUUID().slice(0, 12)}`,
-      nickname: state.user.nickname,
-      phone: '',
-      registered: false,
-      balance: 0,
-      points: 0,
-      availableCoupons: 0,
-      authMode: 'wechat',
-      _openid: payload.openid,
-      _unionid: payload.unionid || '',
-    });
+    // openid/unionid stay server-side; never returned to clients or logged.
+    const existing = db.one('SELECT * FROM users WHERE openid = :openid AND deleted_at IS NULL', { openid: payload.openid });
+    if (existing) return issueSession(existing, false);
+    return issueSession(services.createUser({ openid: payload.openid, unionid: payload.unionid || null, authMode: 'wechat' }), true);
   }
 
   async function bindPhone(token, code) {
     const session = getSession(token);
-    if (!session) throw authError(401, 'AUTH_REQUIRED', '登录会话已失效，请重新登录');
+    if (!session) throw httpError(401, 'AUTH_REQUIRED', '登录会话已失效，请重新登录');
     const phoneCode = String(code || '').trim();
-    if (!phoneCode || phoneCode.length > 512) throw authError(400, 'INVALID_PHONE_CODE', '手机号授权 code 无效');
+    if (!phoneCode || phoneCode.length > 512) throw httpError(400, 'INVALID_PHONE_CODE', '手机号授权 code 无效');
 
+    let phone;
     if (mode === 'mock') {
-      const phone = normalizePhone(env.MOCK_WECHAT_PHONE || state.user.phone);
-      session.user.phone = phone;
-      return { token, user: { ...session.user, authMode: 'mock' } };
+      phone = normalizePhone(mockPhone);
+    } else {
+      const accessToken = await getAccessToken();
+      const payload = await wechatJson(`/wxa/business/getuserphonenumber?access_token=${encodeURIComponent(accessToken)}`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ code: phoneCode }),
+      });
+      phone = normalizePhone(payload.phone_info?.phoneNumber);
+      if (!phone) throw httpError(502, 'WECHAT_PHONE_MISSING', '微信未返回有效手机号');
     }
-
-    const accessToken = await getAccessToken();
-    const payload = await wechatJson(`/wxa/business/getuserphonenumber?access_token=${encodeURIComponent(accessToken)}`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ code: phoneCode }),
-    });
-    const phone = normalizePhone(payload.phone_info?.phoneNumber);
-    if (!phone) throw authError(502, 'WECHAT_PHONE_MISSING', '微信未返回有效手机号');
-    session.user.phone = phone;
-    return { token, user: { ...session.user, authMode: 'wechat' } };
+    return { token, user: services.updateUser(session.user.id, { phone }) };
   }
+
+  function logout(token) {
+    if (token) db.run('DELETE FROM sessions WHERE token_hash = :hash', { hash: hashToken(token) });
+  }
+
+  const purgeExpired = () => db.run('DELETE FROM sessions WHERE expires_at <= :now', { now: Date.now() }).changes;
 
   function publicConfig() {
-    return {
-      mode,
-      appId: appId || null,
-      mock: mode === 'mock',
-      login: true,
-      phoneNumber: mode === 'mock' || Boolean(appId && appSecret),
-      ttlSeconds,
-    };
-  }
-
-  function sessionFromRequest(req) {
-    return getSession(bearerToken(req));
+    return { mode, appId: appId || null, mock: mode === 'mock', login: true, phoneNumber: true, ttlSeconds };
   }
 
   return {
@@ -174,10 +124,10 @@ export function createWechatAuth({ env = process.env, state, logger = console } 
     publicConfig,
     login,
     bindPhone,
+    logout,
     getSession,
-    sessionFromRequest,
-    logger,
+    purgeExpired,
+    sessionFromRequest: (req) => getSession(bearerToken(req)),
+    bearerToken,
   };
 }
-
-export { bearerToken };

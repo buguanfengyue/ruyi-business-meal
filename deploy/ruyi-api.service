@@ -1,0 +1,26 @@
+# systemd unit for the API. Install:
+#   sudo cp deploy/ruyi-api.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now ruyi-api
+#   journalctl -u ruyi-api -f      # logs
+[Unit]
+Description=Ruyi business meal API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ruyi
+WorkingDirectory=/srv/ruyi
+EnvironmentFile=/etc/ruyi/ruyi.env
+ExecStart=/usr/bin/node server/index.mjs
+Restart=always
+RestartSec=3
+# Hardening: the service can only write its data directory.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/ruyi/data
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

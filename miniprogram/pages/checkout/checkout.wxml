@@ -1,0 +1,31 @@
+<view wx:if="{{empty}}" class="empty">
+  <view>购物袋是空的</view>
+  <button bindtap="goMenu">去点单</button>
+</view>
+<view wx:else class="page-pad">
+  <view class="tag">配送</view>
+  <view class="card"><view class="bold">{{store.name}}</view><view class="label">📍 {{store.distanceText}}</view></view>
+  <view class="card">
+    <view class="label">收货地址</view>
+    <view class="line" bindtap="chooseAddress"><text class="ellipsis">{{addressText}}</text><text class="label">›</text></view>
+    <view class="label">预留电话</view>
+    <view class="line"><input class="phone" type="number" maxlength="11" value="{{phone}}" bindinput="onPhone" placeholder="请输入手机号" /></view>
+    <view class="label">预约时间</view>
+    <picker range="{{schedules}}" value="{{scheduleIndex}}" bindchange="onSchedule">
+      <view class="line"><text class="bold">{{schedules[scheduleIndex]}}</text><text class="label">›</text></view>
+    </picker>
+    <view class="label">订单备注</view>
+    <textarea class="note" maxlength="200" auto-height placeholder="口味、餐具等特殊要求" value="{{note}}" bindinput="onNote" />
+  </view>
+  <view class="card">
+    <view class="bold title">商品清单</view>
+    <view wx:for="{{items}}" wx:key="productId" class="line"><text>{{item.name}} × {{item.quantity}}</text><text class="bold">¥{{item.lineText}}</text></view>
+    <view class="line label"><text>会员优惠{{quote.memberName ? '（' + quote.memberName + '）' : ''}}</text><text>-¥{{quote.discountText || '0.00'}}</text></view>
+    <view class="line label" bindtap="chooseCoupon"><text>使用券</text><text class="{{couponId ? 'red' : ''}}">{{couponText}} ›</text></view>
+  </view>
+  <view wx:if="{{quoteError}}" class="red center">金额获取失败：{{quoteError}}</view>
+</view>
+<view wx:if="{{!empty}}" class="bottom-bar">
+  <view class="total">共计 <text class="red big">{{quote ? '¥' + quote.totalText : '计算中…'}}</text></view>
+  <view class="confirm {{!quote || submitting ? 'disabled' : ''}}" bindtap="submit">{{submitting ? '提交中…' : '确认下单'}}</view>
+</view>

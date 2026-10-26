@@ -1,0 +1,6 @@
+.hero { margin: 24rpx; border-radius: 20rpx; background: linear-gradient(135deg, #3f3a37, #6a5a48); color: #e9cf9b; padding: 44rpx 36rpx; }
+.num { font-size: 76rpx; font-weight: 700; margin: 8rpx 0; }
+.rule { color: #cbb994; font-size: 24rpx; line-height: 1.5; }
+.card { margin: 0 24rpx; }
+.bold { font-weight: 700; margin-bottom: 8rpx; }
+.pad { padding: 40rpx 0; text-align: center; }

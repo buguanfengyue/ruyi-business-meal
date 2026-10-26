@@ -1,0 +1,47 @@
+page { height: 100%; display: flex; flex-direction: column; }
+.store-head { background: #fff; padding: 16rpx 28rpx 24rpx; display: flex; justify-content: space-between; align-items: center; }
+.store-name { font-size: 32rpx; font-weight: 700; margin-bottom: 10rpx; }
+.store-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 14rpx; }
+.pill { background: #d91e26; color: #fff; padding: 14rpx 26rpx; border-radius: 36rpx; font-weight: 700; font-size: 26rpx; }
+.store-toggle { font-size: 26rpx; }
+.store-info { background: #fff; padding: 0 28rpx 10rpx; border-top: 1rpx solid #f3f3f3; }
+.menu { flex: 1; display: flex; min-height: 0; }
+.aside { width: 170rpx; background: #f5f5f5; height: 100%; }
+.search { height: 90rpx; margin: 0; padding: 0 12rpx; background: #fff; font-size: 24rpx; text-align: center; }
+.cat { min-height: 140rpx; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8rpx; font-size: 24rpx; color: #555; position: relative; }
+.cat.selected { background: #fff; color: #d91e26; font-weight: 700; }
+.cat.selected::before { content: ''; position: absolute; left: 0; top: 36rpx; bottom: 36rpx; width: 8rpx; background: #d91e26; border-radius: 0 6rpx 6rpx 0; }
+.cat-emoji { font-size: 52rpx; }
+.products { flex: 1; background: #fff; height: 100%; padding: 16rpx 16rpx 140rpx; box-sizing: border-box; }
+.section-title { color: #d91e26; font-size: 28rpx; padding: 0 8rpx 12rpx; }
+.product { display: flex; position: relative; height: 250rpx; border: 1rpx solid #eee; border-radius: 12rpx; overflow: hidden; margin-bottom: 16rpx; }
+.product-image { width: 230rpx; min-width: 230rpx; background: linear-gradient(135deg, #e9bf6e, #78a745 46%, #9e311c); font-size: 100rpx; display: flex; align-items: center; justify-content: center; }
+.product-info { flex: 1; min-width: 0; padding: 14rpx 12rpx; }
+.product-name { font-size: 29rpx; font-weight: 700; line-height: 1.4; }
+.product-desc { color: #999; font-size: 22rpx; line-height: 1.4; margin-top: 6rpx; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.price-line { position: absolute; bottom: 14rpx; left: 244rpx; display: flex; align-items: baseline; gap: 10rpx; }
+.price { font-size: 32rpx; font-weight: 700; }
+.old { font-size: 22rpx; color: #aaa; text-decoration: line-through; }
+.counter { position: absolute; right: 12rpx; bottom: 12rpx; display: flex; align-items: center; gap: 12rpx; }
+.counter.static { position: static; }
+.round { width: 46rpx; height: 46rpx; border-radius: 50%; background: #d91e26; color: #fff; font-size: 34rpx; line-height: 44rpx; text-align: center; }
+.bag { margin-left: 28rpx; padding: 18rpx 26rpx; border-radius: 44rpx; box-shadow: 0 4rpx 14rpx rgba(0,0,0,.12); position: relative; font-size: 26rpx; }
+.badge { position: absolute; right: -6rpx; top: -10rpx; background: #d91e26; color: #fff; min-width: 34rpx; height: 34rpx; border-radius: 17rpx; font-size: 20rpx; text-align: center; line-height: 34rpx; }
+.sum { margin-left: auto; }
+.sum-price { font-size: 36rpx; font-weight: 700; }
+.go { height: 112rpx; line-height: 112rpx; width: 200rpx; margin-left: 24rpx; text-align: center; background: #d91e26; color: #fff; font-size: 32rpx; }
+.sheet-head, .sheet-foot { display: flex; justify-content: space-between; align-items: center; }
+.sheet-head { margin-bottom: 16rpx; }
+.sheet-foot { padding-top: 24rpx; }
+.small { margin: 0; width: auto; padding: 0 48rpx; font-size: 28rpx; }
+.bag-emoji { font-size: 60rpx; margin-right: 16rpx; }
+.bag-name { flex: 1; font-size: 26rpx; display: flex; flex-direction: column; gap: 6rpx; }
+.detail-image { height: 420rpx; margin: -32rpx -28rpx 24rpx; border-radius: 28rpx 28rpx 0 0; background: linear-gradient(135deg, #e8c678, #769942 50%, #92351e); font-size: 220rpx; display: flex; align-items: center; justify-content: center; }
+.detail-name { font-size: 36rpx; font-weight: 700; }
+.register { text-align: center; }
+.register-avatar { width: 120rpx; height: 120rpx; border-radius: 50%; margin: 0 auto 20rpx; background: #282522; color: #e6d3b7; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.register-title { font-size: 38rpx; font-weight: 700; margin-bottom: 10rpx; }
+.center { text-align: center; margin-bottom: 30rpx; }
+.register-input { border: 1rpx solid #eee; border-radius: 10rpx; height: 88rpx; padding: 0 24rpx; text-align: left; margin-bottom: 24rpx; }
+.skip { color: #999; padding: 24rpx; }
+.bold { font-weight: 700; }

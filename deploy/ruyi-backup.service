@@ -1,0 +1,12 @@
+# Daily SQLite backup. Install together with ruyi-backup.timer:
+#   sudo cp deploy/ruyi-backup.* /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now ruyi-backup.timer
+[Unit]
+Description=Ruyi SQLite backup
+
+[Service]
+Type=oneshot
+User=ruyi
+WorkingDirectory=/srv/ruyi
+EnvironmentFile=/etc/ruyi/ruyi.env
+ExecStart=/usr/bin/node scripts/backup-db.mjs

@@ -1,0 +1,75 @@
+<view class="store-head">
+  <view><view class="store-name">{{store.name}}</view><view class="label">📍 {{store.distanceText}}</view></view>
+  <view class="store-actions"><view class="pill">配送</view><view class="store-toggle" bindtap="toggleStore">门店信息 {{showStore ? '⌃' : '⌄'}}</view></view>
+</view>
+<view wx:if="{{showStore}}" class="store-info">
+  <view class="line" bindtap="callStore"><text class="label">门店电话</text><text class="red">📞 联系商家 {{store.phone}}</text></view>
+  <view class="line"><text class="label">配送方式</text><text>商家配送</text></view>
+  <view class="line"><text class="label">营业时间</text><text>10:00 - 20:00</text></view>
+</view>
+
+<view class="menu">
+  <scroll-view scroll-y class="aside">
+    <input class="search" placeholder="🔍 搜索" value="{{keyword}}" bindinput="onSearch" confirm-type="search" />
+    <view wx:for="{{categories}}" wx:key="id" class="cat {{!keyword && cat === item.id ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="pickCat">
+      <text wx:if="{{item.emoji}}" class="cat-emoji">{{item.emoji}}</text><text>{{item.label}}</text>
+    </view>
+  </scroll-view>
+  <scroll-view scroll-y class="products">
+    <view class="section-title">{{title}}</view>
+    <view wx:for="{{list}}" wx:key="id" class="product">
+      <view class="product-image" data-id="{{item.id}}" bindtap="openDetail">{{item.emoji}}</view>
+      <view class="product-info" data-id="{{item.id}}" bindtap="openDetail">
+        <view class="product-name">{{item.name}}</view>
+        <view class="product-desc">{{item.description}}</view>
+        <view class="price-line"><text class="price">¥{{item.priceText}}</text><text wx:if="{{!item.qty}}" class="old">¥{{item.oldPrice}}</text></view>
+      </view>
+      <view class="counter">
+        <view wx:if="{{item.qty}}" class="round" data-id="{{item.id}}" catchtap="remove">−</view>
+        <text wx:if="{{item.qty}}">{{item.qty}}</text>
+        <view class="round" data-id="{{item.id}}" catchtap="add">+</view>
+      </view>
+    </view>
+    <view wx:if="{{!list.length}}" class="empty">没有找到相关商品</view>
+  </scroll-view>
+</view>
+
+<view wx:if="{{count}}" class="bottom-bar">
+  <view class="bag" bindtap="openBag">🛍 购物袋<text class="badge">{{count}}</text></view>
+  <view class="sum"><text class="label">合计 </text><text class="sum-price">¥{{totalText}}</text></view>
+  <view class="go" bindtap="goCheckout">去结账</view>
+</view>
+
+<view wx:if="{{showBag}}" class="mask" bindtap="closeBag">
+  <view class="sheet" catchtap="noop">
+    <view class="sheet-head"><text class="bold">已选{{count}}件</text><text class="label" bindtap="clearBag">🗑 清空购物车</text></view>
+    <view wx:for="{{bagItems}}" wx:key="id" class="line">
+      <text class="bag-emoji">{{item.emoji}}</text>
+      <view class="bag-name"><view>{{item.name}}</view><view class="red">¥{{item.priceText}}</view></view>
+      <view class="counter static">
+        <view class="round" data-id="{{item.id}}" catchtap="remove">−</view><text>{{item.qty}}</text><view class="round" data-id="{{item.id}}" catchtap="add">+</view>
+      </view>
+    </view>
+    <view class="sheet-foot"><text class="sum-price">¥{{totalText}}</text><button class="btn-red small" bindtap="goCheckout">去结账</button></view>
+  </view>
+</view>
+
+<view wx:if="{{detail}}" class="mask detail-mask" bindtap="closeDetail">
+  <view class="sheet" catchtap="noop">
+    <view class="detail-image">{{detail.emoji}}</view>
+    <view class="detail-name">{{detail.name}}</view>
+    <view class="product-desc">{{detail.description}}</view>
+    <view class="sheet-foot"><text class="sum-price">¥{{detail.priceText}}</text><button class="btn-red small" bindtap="addFromDetail">加入购物车{{detail.qty ? '（已选' + detail.qty + '）' : ''}}</button></view>
+  </view>
+</view>
+
+<view wx:if="{{showRegister}}" class="mask" bindtap="skipRegister">
+  <view class="sheet register" catchtap="noop">
+    <view class="register-avatar">如一</view>
+    <view class="register-title">欢迎加入如一商务餐</view>
+    <view class="label center">注册后可同步订单、积分和优惠券</view>
+    <input class="register-input" type="nickname" placeholder="请输入昵称" maxlength="30" value="{{nickname}}" bindinput="onNickname" bindblur="onNickname" />
+    <button class="btn-red" loading="{{registering}}" bindtap="register">快速注册</button>
+    <view class="skip" bindtap="skipRegister">暂时跳过</view>
+  </view>
+</view>

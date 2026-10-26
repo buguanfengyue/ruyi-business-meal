@@ -1,0 +1,9 @@
+<view wx:if="{{loading}}" class="empty">加载中…</view>
+<view wx:elif="{{orders.length}}" class="list">
+  <view wx:for="{{orders}}" wx:key="id" class="card" data-id="{{item.id}}" bindtap="open">
+    <view class="line"><text class="bold">预约 {{item.schedule}}</text><text class="red">{{item.statusText}}</text></view>
+    <view class="summary">{{item.summary}}</view>
+    <view class="line label"><text>下单 {{item.timeText}}</text><text>实付 ¥{{item.totalText}}</text></view>
+  </view>
+</view>
+<view wx:else class="empty"><view>暂无预约，下单时可在“预约时间”中选择取餐时段</view><button bindtap="goMenu">去点单</button></view>

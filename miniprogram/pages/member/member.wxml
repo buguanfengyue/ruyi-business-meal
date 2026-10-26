@@ -1,0 +1,29 @@
+<view wx:if="{{loading}}" class="empty">加载中…</view>
+<block wx:else>
+  <swiper class="cards" current="{{current}}" previous-margin="44rpx" next-margin="44rpx" bindchange="onSwipe">
+    <swiper-item wx:for="{{levels}}" wx:key="level">
+      <view class="card-level">
+        <view class="level-name"><text class="crown" style="color: {{item.crown}}">♛</text><text class="vtag">V{{item.level}}</text><text class="name">{{item.name}}</text></view>
+        <view class="state">{{item.stateText}}</view>
+        <view class="foot"><text>{{item.footText}}</text><text class="rule" data-index="{{index}}" bindtap="showRule">升级说明 ⓘ</text></view>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <view class="section">
+    <view class="h3">会员等级权益</view>
+    <view class="benefit"><text class="badge">{{view.discountText}}</text><text class="benefit-icon">%</text><text>会员价</text></view>
+  </view>
+
+  <view class="section">
+    <view class="h3">开通会员</view>
+    <view wx:if="{{view.level === 1}}" class="req">在「个人中心」<text wx:if="{{phoneBound}}" class="muted">已绑定手机号码</text><text wx:else class="link" bindtap="bindPhone">绑定手机号码</text></view>
+    <view wx:else class="req">累计消费满{{view.minSpent}}元<text wx:if="{{!view.reached}}" class="muted">（已消费¥{{spentText}}，还差¥{{view.gapText}}）</text><text wx:if="{{!phoneBound}}" class="link" bindtap="bindPhone">，绑定手机号码</text></view>
+    <button class="open" disabled>{{view.reached ? '已开通' : '未满足开通条件'}}</button>
+  </view>
+
+  <view class="section">
+    <view class="h2">会员说明</view>
+    <view class="rules"><view wx:for="{{levels}}" wx:key="level">{{item.rule}}</view><view>{{pointsRule}}</view></view>
+  </view>
+</block>

@@ -1,0 +1,13 @@
+.page-pad { padding: 24rpx 24rpx 160rpx; }
+.tag { display: inline-block; background: #d91e26; color: #fff; border-radius: 32rpx; padding: 14rpx 28rpx; margin-bottom: 16rpx; }
+.card .label { margin-top: 8rpx; }
+.bold { font-weight: 700; }
+.title { margin-bottom: 8rpx; }
+.ellipsis { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 12rpx; }
+.phone { font-weight: 700; flex: 1; }
+.note { width: 100%; box-sizing: border-box; min-height: 80rpx; border: 1rpx solid #eee; border-radius: 8rpx; padding: 16rpx; font-size: 28rpx; margin-top: 12rpx; }
+.center { text-align: center; padding: 16rpx; }
+.total { margin-left: 32rpx; flex: 1; }
+.big { font-size: 40rpx; font-weight: 700; }
+.confirm { height: 112rpx; line-height: 112rpx; width: 250rpx; text-align: center; background: #d91e26; color: #fff; font-size: 32rpx; }
+.confirm.disabled { opacity: .6; }

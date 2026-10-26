@@ -1,6 +1,29 @@
 # 原生微信小程序联调壳
 
-这个目录可以直接作为微信开发者工具的小程序项目根目录打开。它不是对原小程序加密包的源码导出，而是自写的最小原生壳，用来验证真实 AppID、`wx.login`、手机号授权和正式 API 连接。
+这个目录可以直接作为微信开发者工具的小程序项目根目录打开。它不是对原小程序加密包的源码导出，而是自写的原生实现，与 Web 复刻版共用同一套 API。
+
+## 页面
+
+| 页面 | 说明 |
+| --- | --- |
+| `pages/home` | 首页（tabBar），账户卡、外卖订餐入口、功能宫格 |
+| `pages/menu` | 点单：分类、搜索、门店信息、商品详情、购物袋、注册弹层 |
+| `pages/checkout` | 确认订单：地址、电话、预约时间、备注、优惠券、实时询价 |
+| `pages/orders` | 订单列表（tabBar） |
+| `pages/order-detail` | 订单详情：模拟支付、取消、再来一单 |
+| `pages/me` | 我的（tabBar）：注册、会员、余额、各入口、联系商家 |
+| `pages/member` | 会员中心：白银/黄金/钻石等级卡、权益、开通条件、会员说明 |
+| `pages/partner` | 共享合伙人（我的分销 / 首页共享股东）：佣金、提现、邀请列表 |
+| `pages/invite` | 推荐朋友：邀新券说明，`open-type="share"` 分享带 `inviter` 参数 |
+| `pages/coupons` | 券包：可使用/已使用/不可用/已赠送，转赠（分享或兑换码）、兑换码领取 |
+| `pages/points` / `pages/bookings` | 我的积分、我的预约 |
+| `pages/addresses` | 收货地址管理 |
+| `pages/info` | 尚未定义业务规则的入口占位页 |
+| `pages/auth` | 微信登录 / 手机号授权调试页 |
+
+「联系商家」统一调用 `app.callStore()` → `wx.makePhoneCall`，真机会直接拉起系统拨号界面并填好号码（微信规定需用户在拨号界面确认拨出）。号码来自 `/api/bootstrap` 的 `store.phone`。
+
+启动时 `utils/request.js` 的 `ensureLogin()` 自动 `wx.login` 换取服务端会话；token 过期时请求会自动重新登录一次。
 
 ## 打开方式
 

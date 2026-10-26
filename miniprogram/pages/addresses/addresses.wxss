@@ -1,0 +1,10 @@
+.list { padding: 24rpx 24rpx 0; }
+.item { display: flex; align-items: center; gap: 20rpx; }
+.main { flex: 1; display: flex; flex-direction: column; gap: 8rpx; }
+.bold { font-weight: 700; }
+.del { padding: 12rpx; }
+.form { margin: 0 24rpx; display: flex; flex-direction: column; gap: 20rpx; }
+.form input, .form textarea { border: 1rpx solid #eee; border-radius: 8rpx; padding: 20rpx; min-height: 44rpx; width: auto; font-size: 28rpx; }
+.actions { display: flex; gap: 20rpx; }
+.actions button { flex: 1; margin: 0; }
+.add { margin: 24rpx; }

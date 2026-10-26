@@ -1,0 +1,21 @@
+page { background: #fff; }
+.cards { height: 340rpx; margin-top: 40rpx; }
+.card-level { margin: 0 12rpx; height: 326rpx; border-radius: 20rpx; background: linear-gradient(135deg, #4a4a4a, #3a3a3a 60%, #474747); color: #bbb; padding: 36rpx 32rpx 28rpx; box-sizing: border-box; display: flex; flex-direction: column; }
+.level-name { display: flex; align-items: center; }
+.crown { font-size: 48rpx; line-height: 1; }
+.vtag { font-size: 18rpx; background: #d6b46a; color: #fff; border-radius: 6rpx; padding: 0 6rpx; margin: 14rpx 20rpx 0 -6rpx; }
+.name { font-size: 36rpx; color: #e9cf9b; font-weight: 700; }
+.state { font-size: 28rpx; margin-top: 4rpx; }
+.foot { margin-top: auto; display: flex; justify-content: space-between; font-size: 28rpx; }
+.rule { color: #c9a96a; }
+.section { padding: 40rpx 44rpx 8rpx; }
+.h3 { font-size: 36rpx; font-weight: 700; margin-bottom: 36rpx; }
+.h2 { font-size: 44rpx; font-weight: 700; margin-bottom: 28rpx; }
+.benefit { position: relative; width: 180rpx; display: flex; flex-direction: column; align-items: center; gap: 24rpx; padding-top: 30rpx; font-size: 28rpx; }
+.badge { position: absolute; top: -10rpx; left: 100rpx; background: #f3d9a4; border-radius: 20rpx; padding: 4rpx 16rpx; font-size: 24rpx; white-space: nowrap; }
+.benefit-icon { width: 52rpx; height: 52rpx; border: 3rpx solid #333; border-radius: 50%; text-align: center; line-height: 50rpx; font-size: 26rpx; }
+.req { margin: 0 0 36rpx 48rpx; font-size: 30rpx; }
+.link { color: #2f88e6; }
+.muted { color: #888; }
+.open { border-radius: 52rpx; height: 104rpx; line-height: 104rpx; background: #eee !important; color: #999 !important; font-size: 32rpx; }
+.rules { color: #777; font-size: 28rpx; line-height: 1.8; padding-bottom: 60rpx; }

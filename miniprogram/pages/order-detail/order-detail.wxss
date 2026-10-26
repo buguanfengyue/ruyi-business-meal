@@ -1,0 +1,10 @@
+.page-pad { padding: 24rpx 24rpx 160rpx; }
+.hero .status { font-size: 44rpx; font-weight: 700; margin-bottom: 8rpx; }
+.status-pending_payment .status { color: #d91e26; }
+.status-paid .status { color: #e07a10; }
+.status-cancelled .status { color: #999; }
+.bold { font-weight: 700; }
+.right { max-width: 70%; text-align: right; }
+.actions { justify-content: flex-end; gap: 20rpx; padding-right: 24rpx; }
+.actions button { margin: 0; width: auto; padding: 0 40rpx; height: 76rpx; line-height: 76rpx; }
+.contact { margin-right: auto; margin-left: 28rpx; font-size: 28rpx; color: #333; }

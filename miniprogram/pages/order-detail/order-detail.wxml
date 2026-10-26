@@ -1,0 +1,30 @@
+<view wx:if="{{error}}" class="empty"><view>{{error}}</view><button bindtap="goOrders">返回订单列表</button></view>
+<view wx:elif="{{!order}}" class="empty">加载中…</view>
+<block wx:else>
+  <view class="page-pad">
+    <view class="card hero status-{{order.status}}"><view class="status">{{order.statusText}}</view><view class="label">{{order.hint}}</view></view>
+    <view class="card">
+      <view class="bold">如一商务餐</view>
+      <view wx:for="{{order.items}}" wx:key="productId" class="line"><text>{{item.name}} × {{item.quantity}}</text><text class="bold">¥{{item.lineText}}</text></view>
+      <view class="line label"><text>商品小计</text><text>¥{{order.t.subtotal}}</text></view>
+      <view class="line label"><text>会员优惠</text><text>-¥{{order.t.discount}}</text></view>
+      <view wx:if="{{order.coupon}}" class="line label"><text>{{order.coupon.title}}</text><text>-¥{{order.t.coupon}}</text></view>
+      <view class="line"><text>实付</text><text class="red bold">¥{{order.t.total}}</text></view>
+    </view>
+    <view class="card">
+      <view class="line"><text class="label">订单编号</text><text selectable>{{order.id}}</text></view>
+      <view class="line"><text class="label">下单时间</text><text>{{order.timeText}}</text></view>
+      <view class="line"><text class="label">配送方式</text><text>{{order.fulfillment === 'pickup' ? '自取' : '配送'}}</text></view>
+      <view class="line"><text class="label">预约时间</text><text>{{order.schedule}}</text></view>
+      <view class="line"><text class="label">预留电话</text><text>{{order.customer.phone}}</text></view>
+      <view wx:if="{{order.address}}" class="line"><text class="label">收货地址</text><text class="right">{{order.address.name}} {{order.address.detail}}</text></view>
+      <view class="line"><text class="label">订单备注</text><text class="right">{{order.note || '无'}}</text></view>
+    </view>
+  </view>
+  <view class="bottom-bar actions">
+    <view class="contact" bindtap="callStore">📞 联系商家</view>
+    <button wx:if="{{order.canCancel}}" class="btn-ghost" disabled="{{busy}}" bindtap="cancel">取消订单</button>
+    <button wx:if="{{order.canPay}}" class="btn-red" disabled="{{busy}}" bindtap="pay">去支付 ¥{{order.t.total}}</button>
+    <button wx:else class="btn-red" bindtap="reorder">再来一单</button>
+  </view>
+</block>

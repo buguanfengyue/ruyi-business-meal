@@ -1,0 +1,9 @@
+<view wx:if="{{!data}}" class="empty">加载中…</view>
+<block wx:else>
+  <view class="hero"><view>当前积分</view><view class="num">{{data.points}}</view><view class="rule">{{data.rule}}</view></view>
+  <view class="card">
+    <view class="bold">积分明细</view>
+    <view wx:for="{{data.records}}" wx:key="orderId" class="line" data-id="{{item.orderId}}" bindtap="open"><text>消费获得 · {{item.timeText}}</text><text class="red">+{{item.points}}</text></view>
+    <view wx:if="{{!data.records.length}}" class="label pad">支付订单后即可获得积分</view>
+  </view>
+</block>

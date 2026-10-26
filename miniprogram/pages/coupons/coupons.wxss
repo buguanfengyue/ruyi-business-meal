@@ -1,0 +1,27 @@
+page { background: #fff; padding-bottom: 180rpx; }
+.seg { display: flex; margin: 20rpx; border: 4rpx solid #d91e26; border-radius: 16rpx; background: #d91e26; overflow: hidden; }
+.seg view { flex: 1; text-align: center; height: 72rpx; line-height: 72rpx; color: #fff; font-size: 30rpx; border-radius: 12rpx; }
+.seg view.on { background: #fff; color: #d91e26; }
+.list { padding: 20rpx 28rpx; }
+.coupon { position: relative; border-radius: 12rpx; box-shadow: 0 4rpx 20rpx rgba(0,0,0,.06); margin-bottom: 24rpx; overflow: hidden; }
+.coupon.used, .coupon.unavailable { opacity: .55; filter: grayscale(1); }
+.corner { position: absolute; right: 0; top: 0; width: 60rpx; height: 60rpx; background: #d91e26; color: #fff; border-radius: 0 0 0 28rpx; text-align: center; line-height: 60rpx; font-size: 30rpx; }
+.top { display: flex; justify-content: space-between; padding: 44rpx 40rpx 28rpx; }
+.top-left { display: flex; flex-direction: column; gap: 28rpx; }
+.title { font-size: 34rpx; font-weight: 700; }
+.top-right { display: flex; flex-direction: column; align-items: flex-end; gap: 16rpx; }
+.amt { color: #d91e26; font-size: 64rpx; line-height: 1; }
+.yen { font-size: 28rpx; }
+.bottom { display: flex; justify-content: space-between; align-items: center; border-top: 1rpx solid #f3f3f3; padding: 20rpx 40rpx; font-size: 28rpx; }
+.rule { padding: 0 40rpx 24rpx; color: #999; font-size: 24rpx; }
+.share-mini { margin: 0; padding: 0 20rpx; height: 52rpx; line-height: 52rpx; font-size: 24rpx; background: #fff5f5; color: #d91e26; }
+.actions { position: fixed; left: 20rpx; right: 20rpx; bottom: calc(24rpx + env(safe-area-inset-bottom)); height: 100rpx; display: flex; border: 2rpx solid #d91e26; border-radius: 50rpx; overflow: hidden; font-size: 34rpx; }
+.actions view { flex: 1; text-align: center; line-height: 100rpx; }
+.outline { color: #d91e26; background: #fff; }
+.solid { color: #fff; background: #d91e26; }
+.center { align-items: center; justify-content: center; }
+.dialog { width: 600rpx; background: #fff; border-radius: 24rpx; padding: 40rpx 36rpx; text-align: center; }
+.d-title { font-size: 34rpx; font-weight: 700; margin-bottom: 20rpx; }
+.code { font-size: 52rpx; font-weight: 800; letter-spacing: 8rpx; color: #d91e26; margin: 28rpx 0; }
+.d-link { color: #999; padding-top: 24rpx; font-size: 26rpx; }
+.code-input { border: 1rpx solid #eee; border-radius: 10rpx; height: 88rpx; margin: 20rpx 0 32rpx; text-align: left; padding: 0 24rpx; }
