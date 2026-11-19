@@ -7,7 +7,8 @@ import { loadConfig } from '../server/config.mjs';
 import { createApp } from '../server/app.mjs';
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruyi-admin-test-'));
-const env = { DATABASE_PATH: path.join(dir, 'ruyi.db'), WECHAT_AUTH_MODE: 'mock', SEED_DEMO: '0', ADMIN_USERNAME: 'boss', ADMIN_PASSWORD: 'correct-horse-1' };
+const env = { DATABASE_PATH: path.join(dir, 'ruyi.db'), WECHAT_AUTH_MODE: 'mock', SEED_DEMO: '0', ADMIN_USERNAME: 'boss', ADMIN_PASSWORD: 'correct-horse-1', STORE_HOURS: '00:00-24:00' };
+process.env.STORE_HOURS = env.STORE_HOURS;
 const quiet = { log() {}, warn() {}, error: console.error };
 
 async function start() {

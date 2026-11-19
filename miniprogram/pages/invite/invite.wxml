@@ -2,7 +2,11 @@
   <image class="hero-img" src="/images/ui/invite-banner.jpg" mode="aspectFill" />
   <view class="call"><view class="c1">点击下方</view><view class="c2">邀请好友</view><view>↓</view></view>
 </view>
-<view wx:if="{{!data}}" class="empty">加载中…</view>
+<view wx:if="{{needLogin}}" class="empty">
+  <view>登录后查看邀请奖励并分享给好友</view>
+  <button class="btn-red" bindtap="goAuth">去登录</button>
+</view>
+<view wx:elif="{{loading || !data}}" class="empty">加载中…</view>
 <block wx:else>
   <view class="panel">
     <button class="share" open-type="share">邀请好友 · 发送给微信好友</button>

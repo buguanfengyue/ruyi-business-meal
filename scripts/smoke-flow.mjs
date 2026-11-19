@@ -43,8 +43,8 @@ function startServer(port, env) {
 
 const post = (body) => ({ method: 'POST', body: JSON.stringify(body) });
 
-const mock = startServer(8790, { WECHAT_AUTH_MODE: 'mock' });
-const wechat = startServer(8791, { WECHAT_AUTH_MODE: 'wechat', WECHAT_APPID: 'wx_test', WECHAT_APPSECRET: 'test-secret', WECHAT_API_BASE_URL: 'http://127.0.0.1:9' });
+const mock = startServer(8790, { WECHAT_AUTH_MODE: 'mock', STORE_HOURS: '00:00-24:00' });
+const wechat = startServer(8791, { WECHAT_AUTH_MODE: 'wechat', WECHAT_APPID: 'wx_test', WECHAT_APPSECRET: 'test-secret', WECHAT_API_BASE_URL: 'http://127.0.0.1:9', STORE_HOURS: '00:00-24:00' });
 
 try {
   await mock.ready();

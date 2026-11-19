@@ -72,6 +72,7 @@ await new Promise((resolve) => fake.listen(0, '127.0.0.1', resolve));
 const fakeBase = `http://127.0.0.1:${fake.address().port}`;
 
 /* ---------- app under test ---------- */
+process.env.STORE_HOURS = '00:00-24:00';
 const app = createApp({
   logger: { log() {}, warn() {}, error() {} },
   config: loadConfig({

@@ -1,32 +1,47 @@
-<view class="seg">
-  <view wx:for="{{tabs}}" wx:key="id" class="{{tab === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="pickTab">{{item.label}}</view>
+<view wx:if="{{needLogin}}" class="empty">
+  <view>登录后查看优惠券</view>
+  <button class="btn-red" bindtap="goAuth">去登录</button>
 </view>
-<view wx:if="{{loading}}" class="empty">加载中…</view>
-<view wx:elif="{{!list.length}}" class="empty">
-  <image class="empty-img" src="/images/empty/null.png" mode="aspectFit" />
-  <view>暂无优惠券</view>
-</view>
-<view wx:else class="list">
-  <view wx:for="{{list}}" wx:key="id" class="coupon {{item.status}}">
-    <image class="corner-img" src="/images/ui/quan.png" mode="aspectFit" />
-    <view class="top">
-      <view class="top-left"><view class="title">{{item.title}}</view><view class="label">{{item.range}}</view></view>
-      <view class="top-right"><view class="amt"><text class="yen">¥</text>{{item.amountText}}</view><view class="label">满¥{{item.thresholdText}}可用</view></view>
+<block wx:else>
+  <view class="seg">
+    <view wx:for="{{tabs}}" wx:key="id" class="{{tab === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="pickTab">{{item.label}}</view>
+  </view>
+  <view wx:if="{{loading}}" class="empty">加载中…</view>
+  <view wx:elif="{{!list.length}}" class="empty">
+    <image class="empty-img" src="/images/empty/null.png" mode="aspectFit" />
+    <view>暂无优惠券</view>
+  </view>
+  <view wx:else class="list">
+    <view wx:for="{{list}}" wx:key="id" class="coupon {{item.status}}">
+      <image class="corner-img" src="/images/ui/quan.png" mode="aspectFit" />
+      <view class="top">
+        <view class="top-left"><view class="title">{{item.title}}</view><view class="label">{{item.range}}</view></view>
+        <view class="top-right"><view class="amt"><text class="yen">¥</text>{{item.amountText}}</view><view class="label">满¥{{item.thresholdText}}可用</view></view>
+      </view>
+      <view class="bottom">
+        <text class="label" data-id="{{item.id}}" bindtap="toggleRule">使用规则 {{open[item.id] ? '▴' : '▾'}}</text>
+        <text wx:if="{{item.status === 'available'}}" class="red" bindtap="use">立即使用</text>
+        <block wx:elif="{{item.status === 'gifted'}}">
+          <text wx:if="{{item.claimed}}" class="label">好友已领取</text>
+          <button wx:else class="share-mini" open-type="share" data-code="{{item.giftCode}}">兑换码 {{item.giftCode}} · 分享</button>
+        </block>
+        <text wx:else class="label">{{item.statusText}}</text>
+      </view>
+      <view wx:if="{{open[item.id]}}" class="rule">订单金额（会员价）满¥{{item.thresholdText}}可用，每单限用一张，不与其他优惠券叠加。</view>
     </view>
-    <view class="bottom">
-      <text class="label" data-id="{{item.id}}" bindtap="toggleRule">使用规则 {{open[item.id] ? '▴' : '▾'}}</text>
-      <text wx:if="{{item.status === 'available'}}" class="red" bindtap="use">立即使用</text>
-      <block wx:elif="{{item.status === 'gifted'}}">
-        <text wx:if="{{item.claimed}}" class="label">好友已领取</text>
-        <button wx:else class="share-mini" open-type="share" data-code="{{item.giftCode}}">兑换码 {{item.giftCode}} · 分享</button>
-      </block>
-      <text wx:else class="label">{{item.statusText}}</text>
-    </view>
-    <view wx:if="{{open[item.id]}}" class="rule">订单金额（会员价）满¥{{item.thresholdText}}可用，每单限用一张，不与其他优惠券叠加。</view>
+  </view>
+
+  <view class="actions"><view class="outline" bindtap="gift">转赠给好友</view><view class="solid" bindtap="openRedeem">兑换码</view></view>
+</block>
+
+<view wx:if="{{showGiftPick}}" class="mask" bindtap="closeGiftPick">
+  <view class="gift-sheet" catchtap="noop">
+    <view class="sheet-title">选择要转赠的券</view>
+    <scroll-view scroll-y class="gift-list">
+      <view wx:for="{{giftOptions}}" wx:key="id" class="gift-row" data-id="{{item.id}}" bindtap="pickGift">{{item.label}}</view>
+    </scroll-view>
   </view>
 </view>
-
-<view class="actions"><view class="outline" bindtap="gift">转赠给好友</view><view class="solid" bindtap="openRedeem">兑换码</view></view>
 
 <view wx:if="{{giftCode}}" class="mask center" bindtap="closeGift">
   <view class="dialog" catchtap="noop">

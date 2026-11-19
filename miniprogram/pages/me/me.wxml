@@ -5,7 +5,7 @@
   <text wx:elif="{{user && !user.registered}}" class="red hint">点击注册 ›</text>
 </view>
 <view wx:if="{{error}}" class="card error" bindtap="load">{{error}}（点击重试）</view>
-<navigator class="member" url="/pages/member/member">
+<navigator wx:if="{{!loggedOut}}" class="member" url="/pages/member/member">
   <view class="member-left">
     <image class="member-badge" src="/images/vip/badge.png" mode="aspectFit" />
     <text>{{memberName}}</text>

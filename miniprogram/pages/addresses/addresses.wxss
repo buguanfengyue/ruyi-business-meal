@@ -11,3 +11,5 @@
 .add-row { display: flex; gap: 16rpx; margin: 24rpx; }
 .add-row .add { flex: 1; margin: 0; }
 .add { margin: 24rpx; }
+.selectable { border: 1rpx solid #f0f0f0; }
+.pick { color: #d91e26; font-weight: 700; padding: 12rpx; }

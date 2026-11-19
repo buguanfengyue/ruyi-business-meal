@@ -9,7 +9,7 @@ const port = 8788;
 const base = `http://127.0.0.1:${port}`;
 const child = spawn(process.execPath, ['server/index.mjs'], {
   cwd: root,
-  env: { ...process.env, DATABASE_PATH: ':memory:', RUYI_API_PORT: String(port) },
+    env: { ...process.env, DATABASE_PATH: ':memory:', RUYI_API_PORT: String(port), STORE_HOURS: '00:00-24:00' },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 

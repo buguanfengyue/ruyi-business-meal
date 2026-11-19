@@ -9,7 +9,7 @@ const port = 8789;
 const base = `http://127.0.0.1:${port}`;
 const child = spawn(process.execPath, ['server/index.mjs'], {
   cwd: root,
-  env: { ...process.env, DATABASE_PATH: ':memory:', RUYI_API_PORT: String(port), WECHAT_AUTH_MODE: 'mock', MOCK_WECHAT_PHONE: '15805320100' },
+  env: { ...process.env, DATABASE_PATH: ':memory:', RUYI_API_PORT: String(port), WECHAT_AUTH_MODE: 'mock', MOCK_WECHAT_PHONE: '15805320100', STORE_HOURS: '00:00-24:00' },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 

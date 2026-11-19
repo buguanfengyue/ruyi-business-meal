@@ -5,6 +5,12 @@
  * mini-program backend. The merchant replaces them through the admin API.
  */
 
+/** Parse STORE_HOURS=HH:MM-HH:MM (close may be 24:00). Used by seed + test overrides. */
+export function parseStoreHours(raw = process.env.STORE_HOURS || '10:00-20:00') {
+  const [open, close] = String(raw).split('-');
+  return { open: open || '10:00', close: close || '20:00' };
+}
+
 export const DEFAULT_SETTINGS = {
   store: {
     id: 'ruyi-store',
@@ -13,7 +19,7 @@ export const DEFAULT_SETTINGS = {
     distanceText: '',
     phone: '15805320100',
     fulfillmentModes: ['delivery'],
-    hours: { open: '10:00', close: '20:00' },
+    hours: parseStoreHours(),
     accepting: true,
     notice: '',
   },
@@ -54,7 +60,8 @@ export function seedDatabase(db, { demo = false, seedCatalog = demo, issueCoupon
   const now = new Date().toISOString();
   db.tx(() => {
     for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {
-      db.run('INSERT OR IGNORE INTO settings (key, value, updated_at) VALUES (:key, :value, :now)', { key, value: JSON.stringify(value), now });
+      const payload = key === 'store' ? { ...value, hours: parseStoreHours() } : value;
+      db.run('INSERT OR IGNORE INTO settings (key, value, updated_at) VALUES (:key, :value, :now)', { key, value: JSON.stringify(payload), now });
     }
     // Catalog: local/mock convenience or explicit SEED_DEMO. Production wechat starts with empty menu for the merchant to import.
     if (seedCatalog && !db.one('SELECT 1 AS x FROM categories LIMIT 1')) {

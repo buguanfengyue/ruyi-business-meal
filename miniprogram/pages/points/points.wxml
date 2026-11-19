@@ -1,4 +1,8 @@
-<view wx:if="{{!data}}" class="empty">加载中…</view>
+<view wx:if="{{needLogin}}" class="empty">
+  <view>登录后查看积分</view>
+  <button class="btn-red" bindtap="goAuth">去登录</button>
+</view>
+<view wx:elif="{{loading || !data}}" class="empty">加载中…</view>
 <block wx:else>
   <view class="hero"><view>当前积分</view><view class="num">{{data.points}}</view><view class="rule">{{data.rule}}</view></view>
   <view class="card">

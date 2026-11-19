@@ -41,9 +41,11 @@ Page({
     this.setData({ loading: true, error: '' });
     try {
       const data = await getBootstrap({ force: true, allowGuest: true });
-      const rate = Number(data.user?.member?.rate) || 1;
-      const isMember = Boolean(data.user?.phone && data.user?.member?.level);
-      const memberLabel = isMember ? (data.user.member.name || '会员') : '';
+      const loggedOut = Boolean(wx.getStorageSync('ruyiLoggedOut'));
+      const user = loggedOut ? null : data.user;
+      const rate = Number(user?.member?.rate) || 1;
+      const isMember = Boolean(user?.phone && user?.member?.level);
+      const memberLabel = isMember ? (user.member.name || '会员') : '';
       const hours = data.store?.hours || {};
       const hoursText = hours.open && hours.close ? `${hours.open} - ${hours.close}` : '';
       const products = data.products.map((p) => {
@@ -141,6 +143,11 @@ Page({
   goCheckout() {
     if (!this.data.count) return;
     if (this.data.storeClosed) return toast(this.data.store.notice || '门店暂停接单');
+    if (wx.getStorageSync('ruyiLoggedOut') || !getApp().globalData.token) {
+      this.setData({ showBag: false });
+      wx.navigateTo({ url: '/pages/auth/auth' });
+      return;
+    }
     const user = getApp().globalData.user;
     if (!user || !user.registered) {
       this.setData({ showBag: false, showRegister: true });

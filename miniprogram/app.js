@@ -35,8 +35,16 @@ App({
   },
 
   setUser(user) {
+    const prev = this.globalData.user;
+    const changed = !prev || !user
+      || prev.id !== user.id
+      || prev.phone !== user.phone
+      || prev.registered !== user.registered
+      || (prev.member && prev.member.level) !== (user.member && user.member.level);
     this.globalData.user = user;
     wx.setStorageSync('ruyiUser', user);
+    // Drop guest/stale bootstrap so home/menu see the new identity immediately.
+    if (changed) this.globalData.bootstrapCache = null;
   },
 
   clearSession() {

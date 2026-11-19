@@ -1,6 +1,7 @@
 const { request } = require('../../utils/request');
 const { money, maskPhone, toast } = require('../../utils/format');
 const { getBootstrap, invalidateBootstrap } = require('../../utils/bootstrap');
+const { isLoggedOutError, goLogin, isMobilePhone } = require('../../utils/auth');
 
 const SCHEDULES = ['尽快送达', '11:30', '12:00', '12:30', '17:30', '18:00'];
 
@@ -11,6 +12,7 @@ function cartEmpty() {
 Page({
   data: {
     store: null,
+    storeError: '',
     items: [],
     quote: null,
     quoteError: '',
@@ -27,12 +29,22 @@ Page({
     submitting: false,
     empty: cartEmpty(),
     submitLabel: '确认下单',
+    showCoupons: false,
   },
 
   onLoad() {
     const user = getApp().globalData.user || {};
     this.setData({ phone: user.phone || '', empty: cartEmpty() });
-    getBootstrap().then((data) => this.setData({ store: data.store })).catch(() => {});
+    getBootstrap()
+      .then((data) => this.setData({ store: data.store, storeError: '' }))
+      .catch((error) => {
+        if (isLoggedOutError(error)) {
+          this.setData({ storeError: '请先登录' });
+          goLogin();
+          return;
+        }
+        this.setData({ storeError: error.message || '门店信息加载失败' });
+      });
     request('/api/coupons').then((data) => {
       this.setData({ coupons: data.coupons.filter((c) => c.status === 'available') });
       this.updateCouponText();
@@ -40,12 +52,23 @@ Page({
   },
 
   onShow() {
-    request('/api/addresses').then((data) => {
-      const keep = data.addresses.find((a) => a.id === this.data.addressId);
+    if (this._skipAddressRefresh) {
+      this._skipAddressRefresh = false;
+    } else {
+      this.refreshAddresses();
+    }
+    this.quote();
+  },
+
+  refreshAddresses(preferredId) {
+    return request('/api/addresses').then((data) => {
+      const keepId = preferredId || this.data.addressId;
+      const keep = data.addresses.find((a) => a.id === keepId);
       this.setData({ addresses: data.addresses });
       this.pickAddress((keep || data.addresses[0] || {}).id || '');
-    }).catch(() => {});
-    this.quote();
+    }).catch((error) => {
+      if (isLoggedOutError(error)) goLogin();
+    });
   },
 
   cartItems() {
@@ -94,55 +117,32 @@ Page({
   },
 
   chooseAddress() {
-    const { addresses } = this.data;
-    if (!addresses.length) return wx.navigateTo({ url: '/pages/addresses/addresses' });
-    wx.showActionSheet({
-      itemList: addresses.map((a) => `${a.name} ${a.detail}`.slice(0, 30)).concat('+ 新增地址', '从微信导入地址'),
-      success: ({ tapIndex }) => {
-        if (tapIndex === addresses.length) wx.navigateTo({ url: '/pages/addresses/addresses' });
-        else if (tapIndex === addresses.length + 1) this.importWechatAddress();
-        else this.pickAddress(addresses[tapIndex].id);
+    this._skipAddressRefresh = true;
+    wx.navigateTo({
+      url: '/pages/addresses/addresses?select=1',
+      events: {
+        selectAddress: ({ id }) => {
+          this.refreshAddresses(id).then(() => this.pickAddress(id));
+        },
       },
-    });
-  },
-
-  importWechatAddress() {
-    wx.chooseAddress({
-      success: async (res) => {
-        try {
-          const detail = [res.provinceName, res.cityName, res.countyName, res.detailInfo].filter(Boolean).join('');
-          const data = await request('/api/addresses', {
-            method: 'POST',
-            data: { name: res.userName, phone: res.telNumber, detail },
-          });
-          const list = await request('/api/addresses');
-          this.setData({ addresses: list.addresses });
-          const created = data.address || list.addresses.find((a) => a.detail === detail) || list.addresses[0];
-          if (created) this.pickAddress(created.id);
-          toast('已导入微信地址');
-        } catch (error) {
-          toast(error.message || '导入失败');
-        }
-      },
-      fail: (err) => {
-        if (err && /cancel|deny|auth/i.test(err.errMsg || '')) return;
-        toast('无法打开微信地址');
-      },
+      fail: () => { this._skipAddressRefresh = false; },
     });
   },
 
   chooseCoupon() {
+    this.setData({ showCoupons: true });
+  },
+
+  closeCoupons() { this.setData({ showCoupons: false }); },
+  noop() {},
+
+  pickCoupon(e) {
+    const id = e.currentTarget.dataset.id || '';
+    const coupon = this.data.coupons.find((c) => c.id === id);
     const subtotal = this.data.quote ? this.data.quote.payable : 0;
-    const coupons = this.data.coupons;
-    wx.showActionSheet({
-      itemList: ['不使用优惠券'].concat(coupons.map((c) => (subtotal >= c.threshold ? c.title : `${c.title}（还差¥${money(c.threshold - subtotal)}）`))),
-      success: ({ tapIndex }) => {
-        const coupon = coupons[tapIndex - 1];
-        if (coupon && subtotal < coupon.threshold) return toast('未满足使用门槛');
-        this.setData({ couponId: coupon ? coupon.id : '' });
-        this.quote();
-      },
-    });
+    if (coupon && subtotal < coupon.threshold) return toast('未满足使用门槛');
+    this.setData({ couponId: id, showCoupons: false });
+    this.quote();
   },
 
   onSchedule(e) { this.setData({ scheduleIndex: Number(e.detail.value) }); },
@@ -152,10 +152,10 @@ Page({
   async submit() {
     const { quote, phone, submitting, addressId, addresses } = this.data;
     if (!quote || submitting) return;
-    if (!/^1\d{10}$/.test(phone)) return toast('请填写有效的 11 位手机号');
+    if (!isMobilePhone(phone)) return toast('请填写有效的 11 位手机号');
     if (!addressId) {
       toast(addresses.length ? '请选择收货地址' : '请先添加收货地址');
-      if (!addresses.length) wx.navigateTo({ url: '/pages/addresses/addresses' });
+      if (!addresses.length) this.chooseAddress();
       return;
     }
     this.setData({ submitting: true });

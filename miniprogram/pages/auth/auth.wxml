@@ -14,7 +14,6 @@
     <button
       wx:if="{{loggedIn}}"
       open-type="getPhoneNumber"
-      bindagreeprivacyauthorization="onAgreePrivacy"
       bindgetphonenumber="onGetPhoneNumber"
     >授权手机号</button>
     <view wx:if="{{message}}" class="message">{{message}}</view>

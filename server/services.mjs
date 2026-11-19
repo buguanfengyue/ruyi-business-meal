@@ -321,7 +321,11 @@ export function createServices({ db, config }) {
   function assertStoreOpen() {
     const store = getSetting('store');
     if (!store.accepting) throw httpError(409, 'STORE_CLOSED', store.notice || '门店暂停接单，请稍后再来');
-    const { open = '00:00', close = '24:00' } = store.hours || {};
+    // STORE_HOURS overrides DB hours for tests / overnight local debugging only.
+    const hours = process.env.STORE_HOURS
+      ? (() => { const [open, close] = String(process.env.STORE_HOURS).split('-'); return { open, close }; })()
+      : (store.hours || {});
+    const { open = '00:00', close = '24:00' } = hours;
     const { time } = localParts();
     const inHours = open <= close ? time >= open && time < close : time >= open || time < close;
     if (!inHours) throw httpError(409, 'STORE_CLOSED', `当前不在营业时间（${open}-${close}）`);

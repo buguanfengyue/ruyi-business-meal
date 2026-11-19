@@ -23,6 +23,7 @@ function loadCjs(file) {
   return module.exports;
 }
 
+process.env.STORE_HOURS = '00:00-24:00';
 const server = createApp({ config: loadConfig({ DATABASE_PATH: ':memory:', WECHAT_AUTH_MODE: 'mock' }), logger: { log() {}, warn() {}, error: console.error } });
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const apiBase = `http://127.0.0.1:${server.address().port}`;
@@ -125,7 +126,10 @@ try {
   assert.equal(checkout.data.quote.totalText, '101.92');
   assert.ok(checkout.data.addressId, '自动选中地址');
   assert.equal(checkout.data.couponText, '2张可用');
-  tapIndex = 1; checkout.chooseCoupon(); tapIndex = 0; await wait(200);
+  checkout.chooseCoupon();
+  assert.equal(checkout.data.showCoupons, true);
+  checkout.pickCoupon(ev({ id: checkout.data.coupons[0].id }));
+  await wait(200);
   assert.equal(checkout.data.quote.totalText, '91.92');
   checkout.onSchedule({ detail: { value: '2' } });
   await checkout.submit();
@@ -167,6 +171,11 @@ try {
   await auth.login();
   assert.equal(storage.ruyiLoggedOut, undefined);
   assert.ok(app.globalData.token);
+  // Login must invalidate guest bootstrap so home does not keep user=null for 45s.
+  assert.equal(app.globalData.bootstrapCache, null);
+  const homeAfterLogin = page('home');
+  await homeAfterLogin.load();
+  assert.ok(homeAfterLogin.data.user && homeAfterLogin.data.user.id);
 
   const member = page('member');
   await member.load();
@@ -181,8 +190,11 @@ try {
   const coupons = page('coupons');
   coupons.onLoad({}); await coupons.onShow();
   assert.equal(coupons.data.list.length, 1);
-  tapIndex = 0;
-  coupons.gift(); await wait(300);
+  coupons.gift();
+  assert.equal(coupons.data.showGiftPick, true);
+  assert.ok(coupons.data.giftOptions.length);
+  await coupons.pickGift(ev({ id: coupons.data.giftOptions[0].id }));
+  await wait(200);
   const giftCode = coupons.data.giftCode;
   assert.ok(giftCode);
   assert.equal(coupons.onShareAppMessage({}).path, `/pages/coupons/coupons?claim=${giftCode}`);
