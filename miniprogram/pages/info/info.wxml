@@ -1,6 +1,14 @@
 <view class="info">
-  <image wx:if="{{image}}" class="info-img" src="{{image}}" mode="{{imageMode}}" />
+  <image
+    wx:if="{{image}}"
+    class="info-img"
+    src="{{image}}"
+    mode="{{imageMode}}"
+    show-menu-by-longpress="{{true}}"
+    bindtap="previewQr"
+  />
   <view wx:else class="icon">{{icon}}</view>
   <view class="title">{{title}}</view>
   <view class="text">{{text}}</view>
+  <view wx:if="{{image}}" class="hint">点击预览 · 长按可识别图中二维码</view>
 </view>

@@ -1,5 +1,6 @@
 const { request } = require('../../utils/request');
 const { money, formatTime, toast } = require('../../utils/format');
+const { inviteShareMessage } = require('../../utils/share');
 
 const present = (rows) => rows.map((r) => Object.assign({}, r, { commissionText: money(r.commission), timeText: formatTime(r.invitedAt) }));
 
@@ -18,6 +19,10 @@ Page({
     }
   },
 
+  onShareAppMessage() {
+    return inviteShareMessage(this.data.data && this.data.data.inviterId);
+  },
+
   pickTab(e) {
     const tab = Number(e.currentTarget.dataset.tab);
     this.setData({ tab, rows: tab === 0 ? this.data.data.invited : this.data.data.invalid });
@@ -27,8 +32,6 @@ Page({
     const { rules, commissionRate } = this.data.data;
     wx.showModal({ title: '共享合伙人规则', content: commissionRate ? rules : `${rules}\n\n（佣金比例尚未配置，当前暂不产生佣金）`, showCancel: false });
   },
-
-  invite() { wx.navigateTo({ url: '/pages/invite/invite' }); },
 
   async withdraw() {
     try {

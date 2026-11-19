@@ -8,4 +8,6 @@
 .form input, .form textarea { border: 1rpx solid #eee; border-radius: 8rpx; padding: 20rpx; min-height: 44rpx; width: auto; font-size: 28rpx; }
 .actions { display: flex; gap: 20rpx; }
 .actions button { flex: 1; margin: 0; }
+.add-row { display: flex; gap: 16rpx; margin: 24rpx; }
+.add-row .add { flex: 1; margin: 0; }
 .add { margin: 24rpx; }

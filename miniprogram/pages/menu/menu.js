@@ -1,16 +1,19 @@
-const { request, ensureLogin } = require('../../utils/request');
 const { money, toast } = require('../../utils/format');
+const { getBootstrap } = require('../../utils/bootstrap');
+const { storeShareMessage } = require('../../utils/share');
 
 Page({
   data: {
+    loading: true,
+    error: '',
     store: null,
     categories: [],
     products: [],
     list: [],
+    qtyMap: {},
     cat: 'recommend',
     keyword: '',
     title: '推荐',
-    cart: {},
     count: 0,
     totalText: '0.00',
     bagItems: [],
@@ -21,93 +24,118 @@ Page({
     nickname: '',
     registering: false,
     isMember: false,
+    memberLabel: '',
     hoursText: '',
     storeClosed: false,
   },
 
-  async onLoad() {
+  onLoad() { return this.load(); },
+
+  onShow() {
+    if (!this.data.loading && !this.data.error && this.data.products.length) this.syncCart();
+  },
+
+  onShareAppMessage() { return storeShareMessage(); },
+
+  async load() {
+    this.setData({ loading: true, error: '' });
     try {
-      await ensureLogin();
-      const data = await request('/api/bootstrap');
-      getApp().setUser(data.user);
-      if (data.store && data.store.phone) getApp().globalData.storePhone = data.store.phone;
+      const data = await getBootstrap({ force: true, allowGuest: true });
+      const rate = Number(data.user?.member?.rate) || 1;
       const isMember = Boolean(data.user?.phone && data.user?.member?.level);
+      const memberLabel = isMember ? (data.user.member.name || '会员') : '';
       const hours = data.store?.hours || {};
       const hoursText = hours.open && hours.close ? `${hours.open} - ${hours.close}` : '';
       const products = data.products.map((p) => {
         const listPrice = Number(p.oldPrice);
-        const memberPrice = Number(p.price);
-        const unitPrice = isMember ? memberPrice : listPrice;
+        const unitPrice = Math.round(listPrice * rate * 100) / 100;
         return Object.assign({}, p, {
           isMember,
           unitPrice,
           priceText: money(unitPrice),
-          memberPriceText: money(memberPrice),
           listPriceText: money(listPrice),
-          showMemberHint: !isMember && memberPrice < listPrice,
-          showListStrike: isMember && memberPrice < listPrice,
+          showListStrike: isMember && unitPrice < listPrice,
+          showMemberHint: !isMember,
+          memberHintText: '绑定手机号享会员价',
           cover: (p.imageUrl && String(p.imageUrl).trim()) || '/images/empty/goods.png',
         });
       });
       this.setData({
+        loading: false,
         store: data.store,
         categories: data.categories,
         products,
         isMember,
+        memberLabel,
         hoursText,
         storeClosed: data.store && data.store.accepting === false,
       });
-      this.refresh();
+      this.refreshList();
+      this.syncCart();
     } catch (error) {
-      toast(error.message);
+      this.setData({ loading: false, error: error.message || '网络异常，请重试' });
     }
   },
 
-  onShow() {
-    if (this.data.products.length) this.refresh();
-  },
-
-  refresh(patch = {}) {
+  refreshList(patch = {}) {
     const state = Object.assign({}, this.data, patch);
-    const cart = getApp().globalData.cart;
-    const products = state.products;
     const keyword = state.keyword.trim();
-    const list = products
-      .filter((p) => (keyword ? `${p.name}${p.description}`.includes(keyword) : state.cat === 'recommend' || p.categoryId === state.cat))
-      .map((p) => Object.assign({}, p, { qty: cart[p.id] || 0 }));
-    const bagItems = products.filter((p) => cart[p.id]).map((p) => Object.assign({}, p, { qty: cart[p.id] }));
-    const count = bagItems.reduce((s, p) => s + p.qty, 0);
-    const total = bagItems.reduce((s, p) => s + p.qty * p.unitPrice, 0);
+    const list = state.products.filter((p) => (
+      keyword ? `${p.name}${p.description}`.includes(keyword) : state.cat === 'recommend' || p.categoryId === state.cat
+    ));
     const category = state.categories.find((c) => c.id === state.cat);
-    const detail = state.detail ? Object.assign({}, state.detail, { qty: cart[state.detail.id] || 0 }) : null;
     this.setData(Object.assign(patch, {
-      cart, list, bagItems, count, detail,
-      totalText: money(total),
+      list,
       title: keyword ? `搜索“${keyword}”` : (category ? category.label : '推荐'),
-      showBag: state.showBag && count > 0,
     }));
   },
 
-  pickCat(e) { this.refresh({ cat: e.currentTarget.dataset.id, keyword: '' }); },
-  onSearch(e) { this.refresh({ keyword: e.detail.value }); },
+  syncCart() {
+    const cart = getApp().globalData.cart;
+    const qtyMap = Object.assign({}, cart);
+    const bagItems = this.data.products.filter((p) => qtyMap[p.id]).map((p) => Object.assign({}, p, { qty: qtyMap[p.id] }));
+    const count = bagItems.reduce((s, p) => s + p.qty, 0);
+    const total = bagItems.reduce((s, p) => s + p.qty * p.unitPrice, 0);
+    const detail = this.data.detail
+      ? Object.assign({}, this.data.detail, { qty: qtyMap[this.data.detail.id] || 0 })
+      : null;
+    this.setData({
+      qtyMap,
+      bagItems,
+      count,
+      detail,
+      totalText: money(total),
+      showBag: this.data.showBag && count > 0,
+    });
+  },
+
+  pickCat(e) { this.refreshList({ cat: e.currentTarget.dataset.id, keyword: '' }); },
+
+  onSearch(e) {
+    const keyword = e.detail.value;
+    clearTimeout(this._searchTimer);
+    this._searchTimer = setTimeout(() => this.refreshList({ keyword }), 150);
+  },
+
   toggleStore() { this.setData({ showStore: !this.data.showStore }); },
 
-  add(e) { getApp().updateCart(e.currentTarget.dataset.id, 1); this.refresh(); },
-  remove(e) { getApp().updateCart(e.currentTarget.dataset.id, -1); this.refresh(); },
+  add(e) { getApp().updateCart(e.currentTarget.dataset.id, 1); this.syncCart(); },
+  remove(e) { getApp().updateCart(e.currentTarget.dataset.id, -1); this.syncCart(); },
 
   openDetail(e) {
     const product = this.data.products.find((p) => p.id === e.currentTarget.dataset.id);
-    this.refresh({ detail: product });
+    this.setData({ detail: Object.assign({}, product, { qty: this.data.qtyMap[product.id] || 0 }) });
   },
   closeDetail() { this.setData({ detail: null }); },
   addFromDetail() {
     getApp().updateCart(this.data.detail.id, 1);
-    this.refresh({ detail: null });
+    this.setData({ detail: null });
+    this.syncCart();
   },
 
-  openBag() { this.refresh({ showBag: true }); },
+  openBag() { this.syncCart(); this.setData({ showBag: true }); },
   closeBag() { this.setData({ showBag: false }); },
-  clearBag() { getApp().clearCart(); this.refresh({ showBag: false }); },
+  clearBag() { getApp().clearCart(); this.syncCart(); this.setData({ showBag: false }); },
   noop() {},
 
   goCheckout() {
@@ -125,6 +153,7 @@ Page({
   onNickname(e) { this.setData({ nickname: e.detail.value }); },
   skipRegister() { this.setData({ showRegister: false }); },
   async register() {
+    const { request } = require('../../utils/request');
     const nickname = this.data.nickname.trim();
     if (!nickname) return toast('请输入昵称');
     this.setData({ registering: true });

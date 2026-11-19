@@ -20,6 +20,23 @@ Page({
   cancelAdd() { this.setData({ editing: false }); },
   onInput(e) { this.setData({ [`form.${e.currentTarget.dataset.field}`]: e.detail.value }); },
 
+  importWechat() {
+    wx.chooseAddress({
+      success: async (res) => {
+        const detail = [res.provinceName, res.cityName, res.countyName, res.detailInfo].filter(Boolean).join('');
+        this.setData({
+          editing: true,
+          form: { name: res.userName || '', phone: res.telNumber || '', detail },
+        });
+        toast('已填入微信地址，请确认后保存');
+      },
+      fail: (err) => {
+        if (err && /cancel|deny|auth/i.test(err.errMsg || '')) return;
+        toast('无法打开微信地址');
+      },
+    });
+  },
+
   async save() {
     this.setData({ saving: true });
     try {

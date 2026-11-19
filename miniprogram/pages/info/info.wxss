@@ -3,3 +3,4 @@
 .icon { font-size: 160rpx; color: #222; }
 .title { font-size: 38rpx; font-weight: 700; margin: 24rpx 0 16rpx; }
 .text { color: #888; line-height: 1.7; font-size: 28rpx; }
+.hint { margin-top: 24rpx; color: #07c160; font-size: 26rpx; }

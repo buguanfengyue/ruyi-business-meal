@@ -8,7 +8,7 @@
   </view>
   <view class="money">
     <view class="money-main"><view class="big">{{data.text.withdrawable}}</view><view class="label">可提现佣金 (元)</view></view>
-    <button class="btn-outline" bindtap="invite">邀请好友</button>
+    <button class="btn-outline" open-type="share">邀请好友</button>
     <button class="btn-solid" bindtap="withdraw">提现</button>
   </view>
   <view class="stats">

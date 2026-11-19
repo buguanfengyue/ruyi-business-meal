@@ -26,9 +26,9 @@
     </view>
   </view>
   <view class="bottom-bar actions">
-    <view class="contact" bindtap="callStore"><image class="contact-icon" src="/images/ui/phone.png" mode="aspectFit" />联系商家</view>
+    <view class="contact" bindtap="contactMerchant"><image class="contact-icon" src="/images/ui/phone.png" mode="aspectFit" />联系商家</view>
     <button wx:if="{{order.canCancel}}" class="btn-ghost" disabled="{{busy}}" bindtap="cancel">取消订单</button>
-    <button wx:if="{{order.canPay}}" class="btn-red" disabled="{{busy}}" bindtap="pay">去支付 ¥{{order.t.total}}</button>
+    <button wx:if="{{order.canPay}}" class="btn-red" disabled="{{busy}}" bindtap="pay">{{paying ? '支付确认中…' : order.payLabel}}</button>
     <button wx:else class="btn-red" bindtap="reorder">再来一单</button>
   </view>
 </block>

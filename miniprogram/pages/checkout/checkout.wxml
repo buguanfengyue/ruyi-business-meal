@@ -5,7 +5,10 @@
 </view>
 <view wx:else class="page-pad">
   <view class="tag">配送</view>
-  <view class="card"><view class="bold">{{store.name}}</view><view class="label location-line"><image class="inline-icon" src="/images/ui/location.png" mode="aspectFit" />{{store.distanceText}}</view></view>
+  <view class="card">
+    <view class="bold">{{store.name || '加载中…'}}</view>
+    <view wx:if="{{store.distanceText}}" class="label location-line"><image class="inline-icon" src="/images/ui/location.png" mode="aspectFit" />{{store.distanceText}}</view>
+  </view>
   <view class="card">
     <view class="label">收货地址</view>
     <view class="line" bindtap="chooseAddress"><text class="ellipsis">{{addressText}}</text><text class="label">›</text></view>
@@ -28,5 +31,5 @@
 </view>
 <view wx:if="{{!empty}}" class="bottom-bar">
   <view class="total">共计 <text class="red big">{{quote ? '¥' + quote.totalText : '计算中…'}}</text></view>
-  <view class="confirm {{!quote || submitting ? 'disabled' : ''}}" bindtap="submit">{{submitting ? '提交中…' : '确认下单'}}</view>
+  <view class="confirm {{!quote || submitting ? 'disabled' : ''}}" bindtap="submit">{{submitting ? '提交中…' : submitLabel}}</view>
 </view>

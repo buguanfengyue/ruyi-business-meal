@@ -53,6 +53,11 @@ globalThis.wx = {
   stopPullDownRefresh: () => {},
   makePhoneCall: ({ phoneNumber }) => log.push(['call', phoneNumber]),
   requestPayment: () => { throw new Error('mock mode must not call wx.requestPayment'); },
+  showShareMenu: () => {},
+  previewImage: ({ urls }) => log.push(['preview', urls && urls[0]]),
+  chooseAddress: ({ fail }) => fail({ errMsg: 'chooseAddress:fail cancel' }),
+  removeStorageSync: (k) => { delete storage[k]; },
+  reLaunch: ({ url }) => log.push(['reLaunch', url]),
 };
 let app;
 const pages = {};
@@ -94,10 +99,12 @@ try {
   await menu.onLoad();
   assert.equal(menu.data.list.length, 3);
   menu.pickCat(ev({ id: 'soup' })); assert.equal(menu.data.list.length, 1);
-  menu.onSearch(ev({}, '58元')); assert.equal(menu.data.list.length, 1);
-  menu.onSearch(ev({}, ''));
+  menu.onSearch(ev({}, '58元')); await wait(200); assert.equal(menu.data.list.length, 1);
+  menu.onSearch(ev({}, '')); await wait(200);
   menu.add(ev({ id: 'a' })); menu.add(ev({ id: 'a' })); menu.add(ev({ id: 'd' }));
   assert.equal(menu.data.count, 3);
+  assert.equal(menu.data.qtyMap.a, 2);
+  assert.ok(typeof menu.onShareAppMessage().path === 'string');
   menu.goCheckout(); assert.equal(menu.data.showRegister, true, '未注册用户应弹出注册');
   menu.onNickname(ev({}, '小程序用户'));
   await menu.register();
@@ -130,14 +137,36 @@ try {
   const detail = page('order-detail');
   detail.onLoad({ id: orderId }); await wait();
   assert.equal(detail.data.order.canPay, true);
+  assert.ok(detail.data.order.payLabel.includes('去支付') || detail.data.order.payLabel === '提交订单');
   await detail.pay();
   assert.equal(detail.data.order.status, 'paid');
-  detail.callStore(); assert.deepEqual(log.at(-1), ['call', '15805320100']);
+  tapIndex = 0;
+  detail.contactMerchant(); assert.deepEqual(log.at(-1), ['call', '15805320100']);
+  tapIndex = 1;
+  detail.contactMerchant(); assert.deepEqual(log.at(-1), ['navigateTo', '/pages/info/info?kind=wechat']);
+
+  const info = page('info');
+  info.onLoad({ kind: 'wechat' });
+  info.previewQr();
+  assert.deepEqual(log.at(-1), ['preview', '/images/ui/boss-wechat-qr.jpg']);
 
   const me = page('me');
   await me.load();
   assert.equal(me.data.user.nickname, '小程序用户');
   assert.equal(me.data.memberName, '白银会员');
+
+  // Logout must stick (ruyiLoggedOut) and clear the cart.
+  await me.logout();
+  assert.equal(storage.ruyiLoggedOut, 1);
+  assert.deepEqual(app.globalData.cart, {});
+  assert.equal(app.globalData.token, '');
+  await me.load();
+  assert.equal(me.data.loggedOut, true);
+  // Explicit login from auth page clears the flag.
+  const auth = page('auth');
+  await auth.login();
+  assert.equal(storage.ruyiLoggedOut, undefined);
+  assert.ok(app.globalData.token);
 
   const member = page('member');
   await member.load();
@@ -152,6 +181,7 @@ try {
   const coupons = page('coupons');
   coupons.onLoad({}); await coupons.onShow();
   assert.equal(coupons.data.list.length, 1);
+  tapIndex = 0;
   coupons.gift(); await wait(300);
   const giftCode = coupons.data.giftCode;
   assert.ok(giftCode);
@@ -160,6 +190,8 @@ try {
   const invite = page('invite');
   await invite.onShow();
   assert.equal(invite.onShareAppMessage().path, '/pages/home/home?inviter=demo-user');
+  const homeShare = page('home');
+  assert.equal(homeShare.onShareAppMessage({ from: 'button', target: { dataset: { share: 'invite' } } }).path, '/pages/home/home?inviter=demo-user');
 
   // A friend opens the share card (hot start with ?inviter) and claims the gift.
   app.globalData.token = '';
@@ -178,6 +210,7 @@ try {
   const partner = page('partner');
   await partner.onShow();
   assert.equal(partner.data.data.invited.length, 1);
+  assert.ok(partner.onShareAppMessage().path.includes('inviter='));
   const bookings = page('bookings');
   await bookings.onShow();
   assert.equal(bookings.data.orders.length, 1);

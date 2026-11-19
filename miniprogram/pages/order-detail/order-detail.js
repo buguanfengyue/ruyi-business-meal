@@ -10,15 +10,17 @@ const HINTS = {
 };
 
 Page({
-  data: { order: null, error: '', busy: false },
+  data: { order: null, error: '', busy: false, paying: false },
 
   onLoad(query) {
     this.id = query.id;
+    this.loaded = false;
     this.load();
   },
 
   onShow() {
-    if (this.id) this.load();
+    // Skip the first onShow (paired with onLoad); refresh when returning to the page.
+    if (this.id && this.loaded) this.load();
   },
 
   onPullDownRefresh() {
@@ -29,13 +31,16 @@ Page({
     try {
       const data = await request(`/api/orders/${encodeURIComponent(this.id)}`);
       this.present(data.order);
+      this.loaded = true;
       this.setData({ error: '' });
     } catch (error) {
+      this.loaded = true;
       this.setData({ error: error.message });
     }
   },
 
   present(order) {
+    const total = Number(order.totals.total) || 0;
     this.setData({
       order: Object.assign({}, order, {
         hint: HINTS[order.status] || '',
@@ -49,6 +54,8 @@ Page({
         },
         canCancel: ['pending_payment', 'paid'].includes(order.status),
         canPay: order.status === 'pending_payment',
+        payLabel: total === 0 ? '提交订单' : `去支付 ¥${money(total)}`,
+        zeroPay: total === 0,
       }),
     });
   },
@@ -66,7 +73,7 @@ Page({
   },
 
   async pay() {
-    this.setData({ busy: true });
+    this.setData({ busy: true, paying: true });
     try {
       const data = await request(`/api/orders/${encodeURIComponent(this.id)}/pay`, { method: 'POST' });
       if (!data.payment) {
@@ -86,7 +93,7 @@ Page({
       const cancelled = /cancel/.test((error && error.errMsg) || '');
       toast(cancelled ? '已取消支付' : (error.message || error.errMsg || '支付失败'));
     } finally {
-      this.setData({ busy: false });
+      this.setData({ busy: false, paying: false });
     }
   },
 
@@ -104,7 +111,16 @@ Page({
     wx.navigateTo({ url: '/pages/menu/menu' });
   },
 
-  callStore() { getApp().callStore(); },
+  contactMerchant() {
+    const phone = getApp().globalData.storePhone || '15805320100';
+    wx.showActionSheet({
+      itemList: [`电话联系 ${phone}`, '老板微信（扫码添加）'],
+      success: ({ tapIndex }) => {
+        if (tapIndex === 0) getApp().callStore();
+        else wx.navigateTo({ url: '/pages/info/info?kind=wechat' });
+      },
+    });
+  },
 
   goOrders() { wx.switchTab({ url: '/pages/orders/orders' }); },
 });

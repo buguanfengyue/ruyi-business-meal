@@ -60,7 +60,6 @@ export function registerPublicRoutes(router, { db, config, services, auth, payme
       user: user ? services.presentUser(user) : null,
       authenticated: Boolean(session),
       cart: {},
-      orders: user ? services.listUserOrders(user.id) : [],
       config: { currency: 'CNY', checkoutRequiresRegistration: true, mockPayment: payments.mode === 'mock', payment: payments.mode, auth: auth.publicConfig() },
     };
   });

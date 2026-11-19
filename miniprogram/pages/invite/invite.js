@@ -1,5 +1,6 @@
 const { request } = require('../../utils/request');
 const { money, formatTime, toast } = require('../../utils/format');
+const { inviteShareMessage } = require('../../utils/share');
 
 const present = (rows) => rows.map((r) => Object.assign({}, r, { commissionText: money(r.commission), timeText: formatTime(r.invitedAt) }));
 const reward = (r) => Object.assign({}, r, { amountText: money(r.amount), thresholdText: money(r.threshold) });
@@ -25,13 +26,8 @@ Page({
     this.setData({ tab, rows: tab === 0 ? this.data.data.invited : this.data.data.invalid });
   },
 
-  // The "邀请好友" button uses open-type="share"; the new user opens the
-  // home page with ?inviter=<id> and the server rewards both on first login.
+  // open-type="share" 会打开微信原生「选择发送给谁」面板。
   onShareAppMessage() {
-    const inviterId = this.data.data ? this.data.data.inviterId : '';
-    return {
-      title: '送你一张10元邀新券，来如一商务餐点餐吧',
-      path: `/pages/home/home?inviter=${encodeURIComponent(inviterId)}`,
-    };
+    return inviteShareMessage(this.data.data && this.data.data.inviterId);
   },
 });

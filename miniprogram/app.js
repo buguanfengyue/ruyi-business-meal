@@ -11,6 +11,7 @@ App({
     // Set when the app is opened from a friend's invite share.
     inviterId: '',
     storePhone: '15805320100',
+    bootstrapCache: null,
   },
 
   onLaunch(options) {
@@ -18,6 +19,7 @@ App({
     this.globalData.token = wx.getStorageSync('ruyiToken') || '';
     this.globalData.user = wx.getStorageSync('ruyiUser') || null;
     this.globalData.cart = wx.getStorageSync('ruyiCart') || {};
+    wx.showShareMenu({ withShareTicket: true, menus: ['shareAppMessage', 'shareTimeline'] });
   },
 
   onShow(options) {
@@ -40,6 +42,7 @@ App({
   clearSession() {
     this.globalData.token = '';
     this.globalData.user = null;
+    this.globalData.bootstrapCache = null;
     wx.removeStorageSync('ruyiToken');
     wx.removeStorageSync('ruyiUser');
   },

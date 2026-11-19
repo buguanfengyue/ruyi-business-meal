@@ -1,4 +1,5 @@
 page { background: #fff; }
+.error { margin: 0 32rpx 16rpx; padding: 20rpx; color: #b42318; background: #fff1f0; border-radius: 12rpx; font-size: 26rpx; }
 .profile { display: flex; align-items: center; gap: 20rpx; padding: 40rpx 48rpx; }
 .avatar { width: 132rpx; height: 132rpx; border-radius: 50%; background: #f3f3f3; }
 .profile-main { flex: 1; }

@@ -14,4 +14,7 @@
   <textarea placeholder="详细地址（楼栋、门牌号）" maxlength="100" auto-height value="{{form.detail}}" data-field="detail" bindinput="onInput" />
   <view class="actions"><button class="btn-ghost" bindtap="cancelAdd">取消</button><button class="btn-red" loading="{{saving}}" bindtap="save">保存</button></view>
 </view>
-<button wx:else class="btn-red add" bindtap="startAdd">+ 新增地址</button>
+<view wx:else class="add-row">
+  <button class="btn-ghost add" bindtap="importWechat">从微信导入</button>
+  <button class="btn-red add" bindtap="startAdd">+ 新增地址</button>
+</view>
