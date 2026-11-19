@@ -1,4 +1,7 @@
 .page-pad { padding: 24rpx 24rpx 160rpx; }
+.empty-img { width: 280rpx; height: 240rpx; margin-bottom: 12rpx; }
+.location-line { display: flex; align-items: center; gap: 8rpx; }
+.inline-icon { width: 28rpx; height: 28rpx; }
 .tag { display: inline-block; background: #d91e26; color: #fff; border-radius: 32rpx; padding: 14rpx 28rpx; margin-bottom: 16rpx; }
 .card .label { margin-top: 8rpx; }
 .bold { font-weight: 700; }

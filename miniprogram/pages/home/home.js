@@ -2,7 +2,7 @@ const { request, ensureLogin } = require('../../utils/request');
 const { money } = require('../../utils/format');
 
 Page({
-  data: { loading: true, error: '', user: null, store: null, balanceText: '0.00', avatarText: '未' },
+  data: { loading: true, error: '', user: null, store: null, balanceText: '0.00' },
 
   onShow() { this.load(); },
 
@@ -17,7 +17,7 @@ Page({
       const data = await request('/api/bootstrap');
       getApp().setUser(data.user);
       if (data.store && data.store.phone) getApp().globalData.storePhone = data.store.phone;
-      this.setData({ loading: false, user: data.user, store: data.store, balanceText: money(data.user.balance), avatarText: data.user.registered ? data.user.nickname.slice(0, 1) : '未' });
+      this.setData({ loading: false, user: data.user, store: data.store, balanceText: money(data.user.balance) });
     } catch (error) {
       this.setData({ loading: false, error: error.message || '本地 API 未连接' });
     }

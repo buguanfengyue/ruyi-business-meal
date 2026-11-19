@@ -9,7 +9,7 @@
 .foot { color: #999; font-size: 24rpx; }
 .bold { font-weight: 700; color: #222; }
 .big { font-size: 32rpx; margin-left: 6rpx; }
-.empty-icon { font-size: 140rpx; color: #ddd; }
+.empty-img { width: 360rpx; height: 300rpx; margin-bottom: 12rpx; }
 .status-pending_payment { color: #d91e26; }
 .status-paid { color: #e07a10; }
 .status-completed { color: #2f8f46; }

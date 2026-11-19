@@ -1,5 +1,6 @@
 <view class="info">
-  <view class="icon">{{icon}}</view>
+  <image wx:if="{{image}}" class="info-img" src="{{image}}" mode="{{imageMode}}" />
+  <view wx:else class="icon">{{icon}}</view>
   <view class="title">{{title}}</view>
   <view class="text">{{text}}</view>
 </view>

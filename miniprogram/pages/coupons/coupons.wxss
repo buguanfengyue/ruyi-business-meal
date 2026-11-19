@@ -5,7 +5,8 @@ page { background: #fff; padding-bottom: 180rpx; }
 .list { padding: 20rpx 28rpx; }
 .coupon { position: relative; border-radius: 12rpx; box-shadow: 0 4rpx 20rpx rgba(0,0,0,.06); margin-bottom: 24rpx; overflow: hidden; }
 .coupon.used, .coupon.unavailable { opacity: .55; filter: grayscale(1); }
-.corner { position: absolute; right: 0; top: 0; width: 60rpx; height: 60rpx; background: #d91e26; color: #fff; border-radius: 0 0 0 28rpx; text-align: center; line-height: 60rpx; font-size: 30rpx; }
+.corner-img { position: absolute; right: 16rpx; top: 16rpx; width: 48rpx; height: 48rpx; }
+.empty-img { width: 240rpx; height: 200rpx; margin-bottom: 12rpx; }
 .top { display: flex; justify-content: space-between; padding: 44rpx 40rpx 28rpx; }
 .top-left { display: flex; flex-direction: column; gap: 28rpx; }
 .title { font-size: 34rpx; font-weight: 700; }

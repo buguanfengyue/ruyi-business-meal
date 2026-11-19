@@ -1,4 +1,5 @@
-.info { padding: 160rpx 64rpx; text-align: center; }
+.info { padding: 120rpx 64rpx; text-align: center; }
+.info-img { width: 360rpx; height: 360rpx; margin: 0 auto 12rpx; display: block; }
 .icon { font-size: 160rpx; color: #222; }
 .title { font-size: 38rpx; font-weight: 700; margin: 24rpx 0 16rpx; }
 .text { color: #888; line-height: 1.7; font-size: 28rpx; }

@@ -1,10 +1,11 @@
 <view wx:if="{{empty}}" class="empty">
+  <image class="empty-img" src="/images/empty/cart.png" mode="aspectFit" />
   <view>购物袋是空的</view>
   <button bindtap="goMenu">去点单</button>
 </view>
 <view wx:else class="page-pad">
   <view class="tag">配送</view>
-  <view class="card"><view class="bold">{{store.name}}</view><view class="label">📍 {{store.distanceText}}</view></view>
+  <view class="card"><view class="bold">{{store.name}}</view><view class="label location-line"><image class="inline-icon" src="/images/ui/location.png" mode="aspectFit" />{{store.distanceText}}</view></view>
   <view class="card">
     <view class="label">收货地址</view>
     <view class="line" bindtap="chooseAddress"><text class="ellipsis">{{addressText}}</text><text class="label">›</text></view>

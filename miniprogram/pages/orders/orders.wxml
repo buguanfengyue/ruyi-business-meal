@@ -10,7 +10,7 @@
   </view>
 </view>
 <view wx:else class="empty">
-  <view class="empty-icon">▤</view>
+  <image class="empty-img" src="/images/empty/orders.png" mode="aspectFit" />
   <view>{{error || '您当前还没有订单'}}</view>
   <button bindtap="goMenu">去点单</button>
 </view>

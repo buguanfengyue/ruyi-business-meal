@@ -1,4 +1,5 @@
 .list { padding: 24rpx 24rpx 0; }
+.empty-img { width: 240rpx; height: 200rpx; margin-bottom: 12rpx; }
 .item { display: flex; align-items: center; gap: 20rpx; }
 .main { flex: 1; display: flex; flex-direction: column; gap: 8rpx; }
 .bold { font-weight: 700; }

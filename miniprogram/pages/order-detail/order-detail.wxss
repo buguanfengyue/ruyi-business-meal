@@ -7,4 +7,5 @@
 .right { max-width: 70%; text-align: right; }
 .actions { justify-content: flex-end; gap: 20rpx; padding-right: 24rpx; }
 .actions button { margin: 0; width: auto; padding: 0 40rpx; height: 76rpx; line-height: 76rpx; }
-.contact { margin-right: auto; margin-left: 28rpx; font-size: 28rpx; color: #333; }
+.contact { margin-right: auto; margin-left: 28rpx; font-size: 28rpx; color: #333; display: flex; align-items: center; gap: 8rpx; }
+.contact-icon { width: 32rpx; height: 32rpx; }

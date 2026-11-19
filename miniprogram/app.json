@@ -31,15 +31,21 @@
     "list": [
       {
         "pagePath": "pages/home/home",
-        "text": "首页"
+        "text": "首页",
+        "iconPath": "images/tab/home.png",
+        "selectedIconPath": "images/tab/home-active.png"
       },
       {
         "pagePath": "pages/orders/orders",
-        "text": "订单"
+        "text": "订单",
+        "iconPath": "images/tab/orders.png",
+        "selectedIconPath": "images/tab/orders-active.png"
       },
       {
         "pagePath": "pages/me/me",
-        "text": "我的"
+        "text": "我的",
+        "iconPath": "images/tab/me.png",
+        "selectedIconPath": "images/tab/me-active.png"
       }
     ]
   },

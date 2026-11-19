@@ -1,19 +1,21 @@
 page { background: #fff; }
 .cards { height: 340rpx; margin-top: 40rpx; }
-.card-level { margin: 0 12rpx; height: 326rpx; border-radius: 20rpx; background: linear-gradient(135deg, #4a4a4a, #3a3a3a 60%, #474747); color: #bbb; padding: 36rpx 32rpx 28rpx; box-sizing: border-box; display: flex; flex-direction: column; }
+.card-level { margin: 0 12rpx; height: 326rpx; border-radius: 20rpx; color: #fff; position: relative; overflow: hidden; box-sizing: border-box; }
+.card-bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.card-body { position: relative; z-index: 1; height: 100%; padding: 36rpx 32rpx 28rpx; box-sizing: border-box; display: flex; flex-direction: column; background: linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.45)); }
 .level-name { display: flex; align-items: center; }
-.crown { font-size: 48rpx; line-height: 1; }
-.vtag { font-size: 18rpx; background: #d6b46a; color: #fff; border-radius: 6rpx; padding: 0 6rpx; margin: 14rpx 20rpx 0 -6rpx; }
-.name { font-size: 36rpx; color: #e9cf9b; font-weight: 700; }
-.state { font-size: 28rpx; margin-top: 4rpx; }
-.foot { margin-top: auto; display: flex; justify-content: space-between; font-size: 28rpx; }
+.crown-img { width: 48rpx; height: 48rpx; margin-right: 8rpx; }
+.vtag { font-size: 18rpx; background: #d6b46a; color: #fff; border-radius: 6rpx; padding: 0 6rpx; margin: 8rpx 16rpx 0 0; }
+.name { font-size: 36rpx; color: #fff; font-weight: 700; text-shadow: 0 2rpx 8rpx rgba(0,0,0,.35); }
+.state { font-size: 28rpx; margin-top: 4rpx; color: rgba(255,255,255,.88); }
+.foot { margin-top: auto; display: flex; justify-content: space-between; font-size: 28rpx; color: rgba(255,255,255,.9); }
 .rule { color: #c9a96a; }
 .section { padding: 40rpx 44rpx 8rpx; }
 .h3 { font-size: 36rpx; font-weight: 700; margin-bottom: 36rpx; }
 .h2 { font-size: 44rpx; font-weight: 700; margin-bottom: 28rpx; }
 .benefit { position: relative; width: 180rpx; display: flex; flex-direction: column; align-items: center; gap: 24rpx; padding-top: 30rpx; font-size: 28rpx; }
 .badge { position: absolute; top: -10rpx; left: 100rpx; background: #f3d9a4; border-radius: 20rpx; padding: 4rpx 16rpx; font-size: 24rpx; white-space: nowrap; }
-.benefit-icon { width: 52rpx; height: 52rpx; border: 3rpx solid #333; border-radius: 50%; text-align: center; line-height: 50rpx; font-size: 26rpx; }
+.benefit-icon { width: 72rpx; height: 72rpx; }
 .req { margin: 0 0 36rpx 48rpx; font-size: 30rpx; }
 .link { color: #2f88e6; }
 .muted { color: #888; }

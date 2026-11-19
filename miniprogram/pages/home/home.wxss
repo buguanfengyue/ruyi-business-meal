@@ -3,9 +3,9 @@
 .hero-copy { position: absolute; top: 90rpx; left: 48rpx; color: #fff; display: flex; flex-direction: column; text-shadow: 0 4rpx 10rpx rgba(0,0,0,.5); }
 .hero-name { font-size: 64rpx; font-weight: 700; }
 .hero-sub { font-size: 36rpx; letter-spacing: 14rpx; margin-top: 8rpx; }
-.hero-food { position: absolute; bottom: 120rpx; width: 100%; text-align: center; font-size: 130rpx; }
+.hero-logo { position: absolute; right: 40rpx; bottom: 160rpx; width: 220rpx; height: 220rpx; opacity: 0.92; }
 .account { position: absolute; left: 40rpx; right: 40rpx; bottom: 30rpx; height: 144rpx; background: #fff; border-radius: 14rpx; box-shadow: 0 8rpx 20rpx rgba(0,0,0,.08); display: flex; align-items: center; font-size: 26rpx; }
-.avatar { width: 100rpx; height: 100rpx; border-radius: 50%; margin: 0 18rpx; background: linear-gradient(135deg, #e6b989, #d33d27); color: #fff; font-size: 44rpx; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.avatar { width: 100rpx; height: 100rpx; border-radius: 50%; margin: 0 18rpx; background: #f3f3f3; }
 .account-main { flex: 1; display: flex; flex-direction: column; gap: 6rpx; }
 .metric { width: 130rpx; border-left: 1rpx solid #eee; text-align: center; }
 .bold { font-weight: 700; }
@@ -15,8 +15,7 @@
 .delivery-title { font-size: 56rpx; font-weight: 700; letter-spacing: 6rpx; }
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24rpx; margin-top: 24rpx; }
 .feature { background: #fff; border-radius: 16rpx; box-shadow: 0 4rpx 14rpx rgba(0,0,0,.1); min-height: 190rpx; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10rpx; font-size: 28rpx; }
-.icon { font-size: 60rpx; line-height: 1; }
+.icon-img { width: 72rpx; height: 72rpx; border-radius: 12rpx; }
 .tiny { font-size: 18rpx; color: #aaa; }
-.banner { margin: 44rpx -36rpx 0; height: 240rpx; background: linear-gradient(120deg, #252a2f, #60656a 50%, #2b2524); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8rpx; font-size: 36rpx; }
-.banner-title { font-size: 46rpx; font-weight: 800; letter-spacing: 4rpx; }
+.banner-img { display: block; margin: 44rpx -36rpx 0; width: calc(100% + 72rpx); height: 280rpx; }
 .tech { text-align: center; color: #aaa; font-size: 22rpx; padding: 50rpx 0; }

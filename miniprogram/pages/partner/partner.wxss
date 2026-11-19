@@ -1,7 +1,7 @@
 page { background: #fff; }
 .rules { background: #fdeee2; color: #555; font-size: 26rpx; line-height: 1.75; padding: 16rpx 28rpx; }
 .card-dark { margin: 44rpx 36rpx 0; height: 112rpx; background: linear-gradient(90deg, #3a3a3a, #555); display: flex; align-items: center; padding: 0 32rpx; gap: 32rpx; border-radius: 8rpx 8rpx 0 0; }
-.avatar { width: 76rpx; height: 76rpx; border-radius: 50%; background: #eee; text-align: center; line-height: 76rpx; }
+.avatar { width: 76rpx; height: 76rpx; border-radius: 50%; background: #eee; }
 .badge { background: #f3d9a4; color: #5a4320; font-size: 22rpx; padding: 8rpx 20rpx; border-radius: 6rpx; }
 .rule-link { margin-left: auto; color: #e9cf9b; font-size: 30rpx; }
 .money { display: flex; align-items: center; gap: 24rpx; padding: 40rpx 36rpx 0; }
@@ -22,5 +22,5 @@ page { background: #fff; }
 .thead text:first-child, .trow text:first-child { flex: 1.6; }
 .thead { font-weight: 700; }
 .trow { border-top: 1rpx solid #f3f3f3; color: #555; font-size: 26rpx; }
-.small-empty { padding: 60rpx 0; }
-.empty-art { font-size: 100rpx; opacity: .5; }
+.small-empty { padding: 60rpx 0; display: flex; flex-direction: column; align-items: center; gap: 16rpx; color: #999; }
+.empty-img { width: 220rpx; height: 180rpx; }

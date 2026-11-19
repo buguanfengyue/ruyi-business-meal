@@ -28,7 +28,10 @@ Page({
       const data = await request('/api/bootstrap');
       getApp().setUser(data.user);
       if (data.store && data.store.phone) getApp().globalData.storePhone = data.store.phone;
-      const products = data.products.map((p) => Object.assign({}, p, { priceText: money(p.price) }));
+      const products = data.products.map((p) => Object.assign({}, p, {
+        priceText: money(p.price),
+        cover: (p.imageUrl && String(p.imageUrl).trim()) || `/images/products/${p.id}.png`,
+      }));
       this.setData({ store: data.store, categories: data.categories, products });
       this.refresh();
     } catch (error) {

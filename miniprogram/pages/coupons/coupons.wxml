@@ -2,10 +2,13 @@
   <view wx:for="{{tabs}}" wx:key="id" class="{{tab === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="pickTab">{{item.label}}</view>
 </view>
 <view wx:if="{{loading}}" class="empty">加载中…</view>
-<view wx:elif="{{!list.length}}" class="empty">暂无优惠券</view>
+<view wx:elif="{{!list.length}}" class="empty">
+  <image class="empty-img" src="/images/empty/null.png" mode="aspectFit" />
+  <view>暂无优惠券</view>
+</view>
 <view wx:else class="list">
   <view wx:for="{{list}}" wx:key="id" class="coupon {{item.status}}">
-    <view class="corner">▦</view>
+    <image class="corner-img" src="/images/ui/quan.png" mode="aspectFit" />
     <view class="top">
       <view class="top-left"><view class="title">{{item.title}}</view><view class="label">{{item.range}}</view></view>
       <view class="top-right"><view class="amt"><text class="yen">¥</text>{{item.amountText}}</view><view class="label">满¥{{item.thresholdText}}可用</view></view>

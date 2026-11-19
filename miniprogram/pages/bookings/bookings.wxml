@@ -6,4 +6,8 @@
     <view class="line label"><text>下单 {{item.timeText}}</text><text>实付 ¥{{item.totalText}}</text></view>
   </view>
 </view>
-<view wx:else class="empty"><view>暂无预约，下单时可在“预约时间”中选择取餐时段</view><button bindtap="goMenu">去点单</button></view>
+<view wx:else class="empty">
+  <image class="empty-img" src="/images/empty/content.png" mode="aspectFit" />
+  <view>暂无预约，下单时可在“预约时间”中选择取餐时段</view>
+  <button bindtap="goMenu">去点单</button>
+</view>

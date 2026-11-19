@@ -3,7 +3,10 @@
     <view class="main"><view class="bold">{{item.name}}　{{item.phone}}</view><view class="label">{{item.detail}}</view></view>
     <text class="label del" data-id="{{item.id}}" bindtap="remove">删除</text>
   </view>
-  <view wx:if="{{!loading && !addresses.length && !editing}}" class="empty">还没有收货地址</view>
+  <view wx:if="{{!loading && !addresses.length && !editing}}" class="empty">
+    <image class="empty-img" src="/images/empty/data.png" mode="aspectFit" />
+    <view>还没有收货地址</view>
+  </view>
 </view>
 <view wx:if="{{editing}}" class="card form">
   <input placeholder="联系人" maxlength="20" value="{{form.name}}" data-field="name" bindinput="onInput" />

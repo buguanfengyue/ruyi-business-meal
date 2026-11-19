@@ -1,7 +1,7 @@
 const { request } = require('../../utils/request');
 const { money, toast } = require('../../utils/format');
 
-const CROWNS = ['#c9d1dc', '#f3c64b', '#8fd14f'];
+const CARD_IMAGES = ['/images/vip/silver.jpg', '/images/vip/gold.jpg', '/images/vip/diamond.jpg'];
 
 Page({
   data: { loading: true, levels: [], current: 0, member: null, phoneBound: false, pointsRule: '', view: null },
@@ -13,7 +13,7 @@ Page({
       const data = await request('/api/membership');
       const { member } = data;
       const levels = data.levels.map((l, i) => Object.assign({}, l, {
-        crown: CROWNS[i],
+        cardImage: CARD_IMAGES[i] || CARD_IMAGES[0],
         stateText: member.level === l.level ? '当前等级' : member.level > l.level ? '已达到该等级' : '未达到该等级',
         footText: member.level >= l.level ? '已开通此VIP特权' : '暂未开通此VIP特权',
         reached: member.level >= l.level,
