@@ -21,7 +21,12 @@ const SECURITY_HEADERS = {
  */
 export function createApp({ config, db = openDatabase(config.databasePath), logger = console } = {}) {
   const services = createServices({ db, config });
-  seedDatabase(db, { demo: config.seedDemo, issueCoupon: services.issueCoupon });
+  seedDatabase(db, {
+    demo: config.seedDemo,
+    // Mock/local starts with a sample menu; production wechat leaves catalog empty for the merchant.
+    seedCatalog: config.seedDemo || config.auth.mode === 'mock',
+    issueCoupon: services.issueCoupon,
+  });
   const auth = createWechatAuth({ config, db, services, logger });
   const payments = createPayments({ config, services, logger });
   const limiter = createRateLimiter({ limit: Number(process.env.RATE_LIMIT_PER_MINUTE || 30), windowMs: 60_000 });
@@ -99,7 +104,7 @@ export function createApp({ config, db = openDatabase(config.databasePath), logg
       }
     }
     const cutoff = new Date(Date.now() - 60_000).toISOString();
-    for (const row of db.all("SELECT * FROM orders WHERE refund_status = 'pending' AND updated_at < :cutoff", { cutoff })) {
+    for (const row of db.all("SELECT * FROM orders WHERE refund_status IN ('pending','failed') AND updated_at < :cutoff", { cutoff })) {
       await refundIfNeeded(row, payments, services);
     }
     auth.purgeExpired();

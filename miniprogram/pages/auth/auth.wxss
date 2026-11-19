@@ -1,4 +1,6 @@
 .intro { min-height: 170rpx; }
 .title { font-size: 42rpx; margin-bottom: 20rpx; }
+.legal-line { margin-top: 20rpx; color: #888; font-size: 24rpx; line-height: 1.6; }
+.link { color: #2f88e6; display: inline; }
 .card button { margin-bottom: 18rpx; }
 .message { color: #555; text-align: center; padding-top: 8rpx; }

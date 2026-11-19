@@ -20,11 +20,16 @@ function createMockPay({ services }) {
   return {
     mode: 'mock',
     async startPayment(row) {
-      const { row: paid } = services.markOrderPaid(row.id, { method: 'mock' });
-      services.logPaymentEvent(row.id, 'mock_paid', { total: paid.total_fen });
+      const method = row.total_fen === 0 ? 'free' : 'mock';
+      const { row: paid } = services.markOrderPaid(row.id, { method });
+      services.logPaymentEvent(row.id, method === 'free' ? 'free_paid' : 'mock_paid', { total: paid.total_fen });
       return { row: paid, payment: null };
     },
     async refund(row) {
+      if (!row.total_fen || row.payment_method === 'free') {
+        services.logPaymentEvent(row.id, 'free_refund', { total: 0 });
+        return services.setRefundStatus(row.id, 'success', `FR${row.id}`);
+      }
       services.logPaymentEvent(row.id, 'mock_refund', { total: row.total_fen });
       return services.setRefundStatus(row.id, 'success', `MR${row.id}`);
     },
@@ -132,6 +137,12 @@ function createWechatPay({ config, services, logger }) {
 
     /** Create (or refresh) a JSAPI prepay and return wx.requestPayment params. */
     async startPayment(row, user) {
+      // WeChat JSAPI rejects amount=0; settle free / fully-covered orders locally.
+      if (row.total_fen === 0) {
+        const { row: paid } = services.markOrderPaid(row.id, { method: 'free' });
+        services.logPaymentEvent(row.id, 'free_paid', { total: 0 });
+        return { row: paid, payment: null };
+      }
       if (!user.openid) throw httpError(400, 'OPENID_REQUIRED', '请使用微信登录后再支付');
       const expire = new Date(Date.parse(row.created_at) + config.orderPayTimeoutMinutes * 60000);
       const { data } = await call('POST', '/v3/pay/transactions/jsapi', {
@@ -177,6 +188,10 @@ function createWechatPay({ config, services, logger }) {
     },
 
     async refund(row) {
+      if (!row.total_fen || row.payment_method === 'free') {
+        services.logPaymentEvent(row.id, 'free_refund', { total: 0 });
+        return services.setRefundStatus(row.id, 'success', row.refund_no || `FR${row.id}`);
+      }
       const refundNo = row.refund_no || `RF${row.id}`;
       const { data } = await call('POST', '/v3/refund/domestic/refunds', {
         out_trade_no: row.id,

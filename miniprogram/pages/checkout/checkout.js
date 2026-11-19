@@ -1,7 +1,7 @@
 const { request } = require('../../utils/request');
 const { money, maskPhone, toast } = require('../../utils/format');
 
-const SCHEDULES = ['立即取单', '11:30', '12:00', '12:30', '17:30', '18:00'];
+const SCHEDULES = ['尽快送达', '11:30', '12:00', '12:30', '17:30', '18:00'];
 
 Page({
   data: {
@@ -118,9 +118,14 @@ Page({
   onNote(e) { this.setData({ note: e.detail.value }); },
 
   async submit() {
-    const { quote, phone, submitting } = this.data;
+    const { quote, phone, submitting, addressId, addresses } = this.data;
     if (!quote || submitting) return;
     if (!/^1\d{10}$/.test(phone)) return toast('请填写有效的 11 位手机号');
+    if (!addressId) {
+      toast(addresses.length ? '请选择收货地址' : '请先添加收货地址');
+      if (!addresses.length) wx.navigateTo({ url: '/pages/addresses/addresses' });
+      return;
+    }
     this.setData({ submitting: true });
     try {
       const app = getApp();
@@ -133,7 +138,7 @@ Page({
           schedule: SCHEDULES[this.data.scheduleIndex],
           note: this.data.note,
           couponId: this.data.couponId || undefined,
-          addressId: this.data.addressId || undefined,
+          addressId,
         },
       });
       app.clearCart();

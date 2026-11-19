@@ -1,11 +1,15 @@
 <view class="store-head">
-  <view><view class="store-name">{{store.name}}</view><view class="label location-line"><image class="inline-icon" src="/images/ui/location.png" mode="aspectFit" />{{store.distanceText}}</view></view>
+  <view>
+    <view class="store-name">{{store.name}}</view>
+    <view wx:if="{{store.distanceText}}" class="label location-line"><image class="inline-icon" src="/images/ui/location.png" mode="aspectFit" />{{store.distanceText}}</view>
+    <view wx:if="{{store.notice}}" class="label red">{{store.notice}}</view>
+  </view>
   <view class="store-actions"><view class="pill">配送</view><view class="store-toggle" bindtap="toggleStore">门店信息 {{showStore ? '⌃' : '⌄'}}</view></view>
 </view>
 <view wx:if="{{showStore}}" class="store-info">
   <view class="line" bindtap="callStore"><text class="label">门店电话</text><text class="red phone-line"><image class="inline-icon" src="/images/ui/phone.png" mode="aspectFit" />联系商家 {{store.phone}}</text></view>
   <view class="line"><text class="label">配送方式</text><text>商家配送</text></view>
-  <view class="line"><text class="label">营业时间</text><text>10:00 - 20:00</text></view>
+  <view class="line"><text class="label">营业时间</text><text>{{hoursText || '以门店公示为准'}}</text></view>
 </view>
 
 <view class="menu">
@@ -25,7 +29,11 @@
       <view class="product-info" data-id="{{item.id}}" bindtap="openDetail">
         <view class="product-name">{{item.name}}</view>
         <view class="product-desc">{{item.description}}</view>
-        <view class="price-line"><text class="price">¥{{item.priceText}}</text><text wx:if="{{!item.qty}}" class="old">¥{{item.oldPrice}}</text></view>
+        <view class="price-line">
+          <text class="price">¥{{item.priceText}}</text>
+          <text wx:if="{{item.showListStrike}}" class="old">¥{{item.listPriceText}}</text>
+          <text wx:elif="{{item.showMemberHint}}" class="member-hint">会员¥{{item.memberPriceText}}</text>
+        </view>
       </view>
       <view class="counter">
         <view wx:if="{{item.qty}}" class="round" data-id="{{item.id}}" catchtap="remove">−</view>

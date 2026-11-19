@@ -9,12 +9,11 @@ export const DEFAULT_SETTINGS = {
   store: {
     id: 'ruyi-store',
     name: '如一商务餐',
-    distanceText: '距离 1743.2km',
+    // Leave empty until the merchant sets a real address/distance; never show a fake km.
+    distanceText: '',
     phone: '15805320100',
     fulfillmentModes: ['delivery'],
-    // Local store time (STORE_TIMEZONE). Open all day until the merchant
-    // configures real hours.
-    hours: { open: '00:00', close: '24:00' },
+    hours: { open: '10:00', close: '20:00' },
     accepting: true,
     notice: '',
   },
@@ -31,7 +30,7 @@ export const DEFAULT_SETTINGS = {
   partner: {
     // Share of an invitee's completed order. 0 until the merchant sets it.
     commissionRate: 0,
-    rules: '【赚钱方法】【如何成为共享合伙人】进入小程序或分享店铺给好友或群，即可成为“共享合伙人”，或者将已领到的【优惠券】转发给微信好友或微信群，新用户领券后，凭此券在本店消费，你都可以赚到Ta消费产生的佣金，可直接提现到微信零钱，在家即可轻松躺赚！【如已是合作伙伴，可提现佣金及绑定的好友下方可见】详情可咨询店内人员。',
+    rules: '邀请好友注册并在本店消费后，可按设定比例获得单级邀请奖励。奖励规则以门店公示为准，提现需开通微信支付商家转账；未开通前仅记录佣金。详情请咨询店内人员。',
   },
 };
 
@@ -41,24 +40,24 @@ export const DEFAULT_CATEGORIES = [
   { id: 'soup', label: '例汤', emoji: '🍲', sort: 2 },
 ];
 
-// price = 白银会员价 shown on the menu; listPrice = 原价 used for checkout.
+// price = 白银会员价; listPrice = 原价（结算以 listPrice 为基数再打折）.
 export const DEFAULT_PRODUCTS = [
   { id: 'a', categoryId: 'a', name: '38元A套餐：三荤三素+两主食', price: 37.24, listPrice: 38, description: '我们的服务目标：为白衣天使提供营养、健康、美味', emoji: '🍕' },
   { id: 'b', categoryId: 'a', name: '58元套餐：三荤三素+一汤+两主食', price: 56.84, listPrice: 58, description: '我们的服务目标：为白衣天使提供营养、健康、美味', emoji: '🍲' },
-  { id: 'c', categoryId: 'a', name: '38元A套餐：三荤三素+两主食', price: 37.24, listPrice: 38, description: '我们的服务目标：为白衣天使提供营养、健康、美味', emoji: '🍖' },
   { id: 'd', categoryId: 'soup', name: '松茸鸡汤', price: 27.44, listPrice: 28, description: '每日现熬例汤，暖胃又营养', emoji: '🥣' },
 ];
 
 export const DEMO_USER = { id: 'demo-user', nickname: '未授权', phone: '15805320100' };
 
 /** Seed an empty database. Safe to call on every start. */
-export function seedDatabase(db, { demo = false, issueCoupon } = {}) {
+export function seedDatabase(db, { demo = false, seedCatalog = demo, issueCoupon } = {}) {
   const now = new Date().toISOString();
   db.tx(() => {
     for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {
       db.run('INSERT OR IGNORE INTO settings (key, value, updated_at) VALUES (:key, :value, :now)', { key, value: JSON.stringify(value), now });
     }
-    if (!db.one('SELECT 1 AS x FROM categories LIMIT 1')) {
+    // Catalog: local/mock convenience or explicit SEED_DEMO. Production wechat starts with empty menu for the merchant to import.
+    if (seedCatalog && !db.one('SELECT 1 AS x FROM categories LIMIT 1')) {
       for (const c of DEFAULT_CATEGORIES) {
         db.run('INSERT INTO categories (id, label, emoji, sort, created_at) VALUES (:id, :label, :emoji, :sort, :now)', { ...c, now });
       }

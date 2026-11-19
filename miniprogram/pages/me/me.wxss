@@ -4,15 +4,13 @@ page { background: #fff; }
 .profile-main { flex: 1; }
 .name { font-size: 40rpx; font-weight: 700; margin-bottom: 10rpx; }
 .hint { font-size: 26rpx; }
-.member { margin: 0 32rpx; background: #3f3a37; color: #d9c8b0; height: 84rpx; border-radius: 16rpx 16rpx 0 0; padding: 0 24rpx; display: flex; align-items: center; justify-content: space-between; }
+.member { margin: 0 32rpx; background: #3f3a37; color: #d9c8b0; height: 84rpx; border-radius: 16rpx; padding: 0 24rpx; display: flex; align-items: center; justify-content: space-between; }
 .member-left { display: flex; align-items: center; gap: 12rpx; }
 .member-badge { width: 36rpx; height: 36rpx; }
 .member-more { font-size: 26rpx; }
-.balance { position: relative; padding: 30rpx 40rpx 40rpx; }
-.balance-num { font-size: 62rpx; font-weight: 700; margin-top: 12rpx; }
-.recharge { position: absolute; right: 40rpx; top: 96rpx; border: 1rpx solid #cdb99b; color: #c7a980; border-radius: 34rpx; padding: 10rpx 40rpx; }
-.list { border-top: 1rpx solid #eee; }
-.row { height: 120rpx; padding: 0 40rpx; border-bottom: 1rpx solid #eee; display: flex; align-items: center; justify-content: space-between; font-size: 30rpx; }
+.list { border-top: 1rpx solid #eee; margin-top: 24rpx; }
+.row { height: 120rpx; padding: 0 40rpx; border-bottom: 1rpx solid #eee; display: flex; align-items: center; justify-content: space-between; font-size: 30rpx; box-sizing: border-box; }
+.row.danger { color: #d91e26; }
 .row-left { display: flex; align-items: center; gap: 20rpx; }
 .row-icon { width: 40rpx; height: 40rpx; }
 .register { text-align: center; }

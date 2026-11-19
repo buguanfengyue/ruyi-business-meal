@@ -15,7 +15,7 @@ const DEFAULT_PRODUCTS=[
 const DEFAULT_CATEGORIES=[{id:'recommend',label:'推荐',emoji:''},{id:'a',label:'38元A套餐',emoji:'🍕'},{id:'soup',label:'例汤',emoji:'🍲'}];
 const DEFAULT_STORE={name:'如一商务餐',distanceText:'距离 1743.2km',phone:'15805320100'};
 const DEFAULT_USER={nickname:'未授权',phone:'15805320100',registered:false,balance:0,points:0,availableCoupons:2};
-const SCHEDULES=['立即取单','11:30','12:00','12:30','17:30','18:00'];
+const SCHEDULES=['尽快送达','11:30','12:00','12:30','17:30','18:00'];
 const CART_KEY='ruyiCart';
 
 // Placeholder pages for entries whose business rules are not defined yet.

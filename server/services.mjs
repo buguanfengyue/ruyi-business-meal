@@ -327,6 +327,8 @@ export function createServices({ db, config }) {
     if (!inHours) throw httpError(409, 'STORE_CLOSED', `当前不在营业时间（${open}-${close}）`);
   }
 
+  const ALLOWED_SCHEDULES = new Set(['尽快送达', '11:30', '12:00', '12:30', '17:30', '18:00']);
+
   function createOrder(user, body) {
     assertStoreOpen();
     const rawItems = Array.isArray(body.items) ? body.items : Object.entries(body.cart || {}).map(([productId, quantity]) => ({ productId, quantity }));
@@ -334,6 +336,11 @@ export function createServices({ db, config }) {
     const phone = validPhone(customer.phone || user.phone);
     if (!phone) throw httpError(400, 'INVALID_PHONE', '请提供有效的 11 位手机号');
     const nickname = str(customer.nickname || user.nickname, 30);
+    const fulfillment = body.fulfillment === 'pickup' ? 'pickup' : 'delivery';
+    const scheduleRaw = str(body.schedule || '尽快送达', 20);
+    // Accept legacy "立即取单" from older clients as "尽快送达".
+    const schedule = scheduleRaw === '立即取单' ? '尽快送达' : scheduleRaw;
+    if (!ALLOWED_SCHEDULES.has(schedule)) throw httpError(400, 'INVALID_SCHEDULE', '预约时间不在可选时段内');
 
     return db.tx(() => {
       const quote = calculateQuote(user, rawItems, body.couponId);
@@ -342,6 +349,9 @@ export function createServices({ db, config }) {
         const row = db.one('SELECT * FROM addresses WHERE id = :id AND user_id = :userId', { id: String(body.addressId), userId: user.id });
         if (!row) throw httpError(400, 'ADDRESS_NOT_FOUND', '收货地址不存在');
         address = presentAddress(row);
+      }
+      if (fulfillment === 'delivery' && !address) {
+        throw httpError(400, 'ADDRESS_REQUIRED', '配送订单请先选择收货地址');
       }
       const { date } = localParts();
       const pickupNo = db.one('SELECT COALESCE(MAX(pickup_no), 0) + 1 AS n FROM orders WHERE business_date = :date', { date }).n;
@@ -352,8 +362,8 @@ export function createServices({ db, config }) {
         VALUES (:id, :userId, :pickupNo, :date, 'pending_payment', :fulfillment, :schedule, :note, :phone, :nickname,
           :address, :items, :couponId, :couponTitle, :subtotal, :discount, :couponDiscount, :total, :level, :now, :now)`, {
         id, userId: user.id, pickupNo, date,
-        fulfillment: body.fulfillment === 'pickup' ? 'pickup' : 'delivery',
-        schedule: str(body.schedule || '立即取单', 20),
+        fulfillment,
+        schedule,
         note: str(body.note, 200),
         phone, nickname,
         address: address ? JSON.stringify(address) : null,
@@ -419,8 +429,14 @@ export function createServices({ db, config }) {
         const hint = by === 'customer' && row.status === 'preparing' ? '，商家已接单，请联系商家处理' : '';
         throw httpError(409, 'ORDER_NOT_CANCELLABLE', `订单当前状态不可取消：${ORDER_STATUS_TEXT[row.status]}${hint}`);
       }
-      db.run(`UPDATE orders SET status = 'cancelled', cancelled_at = :now, cancel_reason = :reason, refund_status = :refund, updated_at = :now WHERE id = :id`, {
-        now: nowIso(), reason: str(reason || (by === 'customer' ? '顾客取消' : '商家取消'), 100), refund: row.paid_at ? 'pending' : null, id: orderId,
+      let refund = null;
+      if (row.paid_at) {
+        // Free / zero-amount orders never hit WeChat Pay — mark refund done immediately.
+        refund = (!row.total_fen || row.payment_method === 'free') ? 'success' : 'pending';
+      }
+      db.run(`UPDATE orders SET status = 'cancelled', cancelled_at = :now, cancel_reason = :reason, refund_status = :refund,
+        refunded_at = CASE WHEN :refund = 'success' THEN :now ELSE refunded_at END, updated_at = :now WHERE id = :id`, {
+        now: nowIso(), reason: str(reason || (by === 'customer' ? '顾客取消' : '商家取消'), 100), refund, id: orderId,
       });
       db.run('UPDATE coupons SET used_by = NULL WHERE used_by = :id', { id: orderId });
       return getOrderRow(orderId);

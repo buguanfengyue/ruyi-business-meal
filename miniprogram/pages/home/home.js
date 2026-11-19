@@ -1,8 +1,8 @@
 const { request, ensureLogin } = require('../../utils/request');
-const { money } = require('../../utils/format');
+const { maskPhone } = require('../../utils/format');
 
 Page({
-  data: { loading: true, error: '', user: null, store: null, balanceText: '0.00' },
+  data: { loading: true, error: '', user: null, store: null, phoneText: '未绑定手机号' },
 
   onShow() { this.load(); },
 
@@ -17,9 +17,14 @@ Page({
       const data = await request('/api/bootstrap');
       getApp().setUser(data.user);
       if (data.store && data.store.phone) getApp().globalData.storePhone = data.store.phone;
-      this.setData({ loading: false, user: data.user, store: data.store, balanceText: money(data.user.balance) });
+      this.setData({
+        loading: false,
+        user: data.user,
+        store: data.store,
+        phoneText: data.user.phone ? maskPhone(data.user.phone) : '未绑定手机号',
+      });
     } catch (error) {
-      this.setData({ loading: false, error: error.message || '本地 API 未连接' });
+      this.setData({ loading: false, error: error.message || '网络异常，请重试' });
     }
   },
 

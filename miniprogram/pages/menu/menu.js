@@ -20,6 +20,9 @@ Page({
     showRegister: false,
     nickname: '',
     registering: false,
+    isMember: false,
+    hoursText: '',
+    storeClosed: false,
   },
 
   async onLoad() {
@@ -28,11 +31,32 @@ Page({
       const data = await request('/api/bootstrap');
       getApp().setUser(data.user);
       if (data.store && data.store.phone) getApp().globalData.storePhone = data.store.phone;
-      const products = data.products.map((p) => Object.assign({}, p, {
-        priceText: money(p.price),
-        cover: (p.imageUrl && String(p.imageUrl).trim()) || '/images/empty/goods.png',
-      }));
-      this.setData({ store: data.store, categories: data.categories, products });
+      const isMember = Boolean(data.user?.phone && data.user?.member?.level);
+      const hours = data.store?.hours || {};
+      const hoursText = hours.open && hours.close ? `${hours.open} - ${hours.close}` : '';
+      const products = data.products.map((p) => {
+        const listPrice = Number(p.oldPrice);
+        const memberPrice = Number(p.price);
+        const unitPrice = isMember ? memberPrice : listPrice;
+        return Object.assign({}, p, {
+          isMember,
+          unitPrice,
+          priceText: money(unitPrice),
+          memberPriceText: money(memberPrice),
+          listPriceText: money(listPrice),
+          showMemberHint: !isMember && memberPrice < listPrice,
+          showListStrike: isMember && memberPrice < listPrice,
+          cover: (p.imageUrl && String(p.imageUrl).trim()) || '/images/empty/goods.png',
+        });
+      });
+      this.setData({
+        store: data.store,
+        categories: data.categories,
+        products,
+        isMember,
+        hoursText,
+        storeClosed: data.store && data.store.accepting === false,
+      });
       this.refresh();
     } catch (error) {
       toast(error.message);
@@ -40,7 +64,6 @@ Page({
   },
 
   onShow() {
-    // The cart may have been cleared by checkout or refilled by "再来一单".
     if (this.data.products.length) this.refresh();
   },
 
@@ -54,7 +77,7 @@ Page({
       .map((p) => Object.assign({}, p, { qty: cart[p.id] || 0 }));
     const bagItems = products.filter((p) => cart[p.id]).map((p) => Object.assign({}, p, { qty: cart[p.id] }));
     const count = bagItems.reduce((s, p) => s + p.qty, 0);
-    const total = bagItems.reduce((s, p) => s + p.qty * p.price, 0);
+    const total = bagItems.reduce((s, p) => s + p.qty * p.unitPrice, 0);
     const category = state.categories.find((c) => c.id === state.cat);
     const detail = state.detail ? Object.assign({}, state.detail, { qty: cart[state.detail.id] || 0 }) : null;
     this.setData(Object.assign(patch, {
@@ -89,6 +112,7 @@ Page({
 
   goCheckout() {
     if (!this.data.count) return;
+    if (this.data.storeClosed) return toast(this.data.store.notice || '门店暂停接单');
     const user = getApp().globalData.user;
     if (!user || !user.registered) {
       this.setData({ showBag: false, showRegister: true });

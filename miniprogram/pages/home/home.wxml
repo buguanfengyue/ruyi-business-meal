@@ -5,15 +5,14 @@
   </view>
   <view class="account" bindtap="goMe">
     <image class="avatar" src="/images/ui/avatar-default.png" mode="aspectFill" />
-    <view class="account-main"><view class="bold">{{user.registered ? user.nickname : '未授权'}}</view><view>{{user.phone || '未绑定手机号'}}</view></view>
-    <view class="metric"><view class="bold">{{balanceText}}</view><view>余额</view></view>
+    <view class="account-main"><view class="bold">{{user.registered ? user.nickname : '未授权'}}</view><view>{{phoneText}}</view></view>
     <view class="metric"><view class="bold">{{user.availableCoupons || 0}}</view><view>可用券</view></view>
   </view>
 </view>
 
 <view class="content">
   <view wx:if="{{error}}" class="card error" bindtap="load">{{error}}（点击重试）</view>
-  <view class="delivery" bindtap="goMenu"><view class="delivery-title">外卖订餐</view><view class="muted">delivery</view></view>
+  <view class="delivery" bindtap="goMenu"><view class="delivery-title">外卖订餐</view><view class="muted">点餐配送</view></view>
   <view class="grid">
     <view class="feature" data-kind="wechat" bindtap="goInfo">
       <image class="icon-img" src="/images/ui/boss-wechat-qr.jpg" mode="aspectFill" />
@@ -29,17 +28,11 @@
       <text class="bold">订餐电话</text>
       <text class="tiny">{{store.phone}}</text>
     </view>
-    <view class="feature" data-url="/pages/partner/partner" bindtap="goPage">
-      <image class="icon-img" src="/images/ui/coupon-3d.png" mode="aspectFit" />
-      <text class="bold">共享股东</text>
-      <text class="tiny">COUPON</text>
-    </view>
-    <view class="feature" data-kind="mall" bindtap="goInfo">
+    <view class="feature" data-url="/pages/points/points" bindtap="goPage">
       <image class="icon-img" src="/images/ui/feature-points.png" mode="aspectFit" />
-      <text class="bold">积分商城</text>
+      <text class="bold">我的积分</text>
       <text class="tiny">POINTS</text>
     </view>
   </view>
   <image class="banner-img" src="/images/ui/invite-banner.jpg" mode="aspectFill" />
-  <view class="tech">餐帮提供技术支持 ></view>
 </view>

@@ -2,8 +2,9 @@ const { request } = require('../../utils/request');
 const { money, formatTime, toast } = require('../../utils/format');
 
 const HINTS = {
-  pending_payment: '请尽快完成支付（本地为模拟支付）',
-  paid: '商家正在备餐，请耐心等待',
+  pending_payment: '请尽快完成支付',
+  paid: '商家已收到订单，请耐心等待接单',
+  preparing: '商家已接单，正在备餐',
   completed: '感谢您的光临',
   cancelled: '订单已取消，优惠券已退回',
 };
@@ -16,10 +17,19 @@ Page({
     this.load();
   },
 
+  onShow() {
+    if (this.id) this.load();
+  },
+
+  onPullDownRefresh() {
+    this.load().finally(() => wx.stopPullDownRefresh());
+  },
+
   async load() {
     try {
       const data = await request(`/api/orders/${encodeURIComponent(this.id)}`);
       this.present(data.order);
+      this.setData({ error: '' });
     } catch (error) {
       this.setData({ error: error.message });
     }
@@ -55,19 +65,13 @@ Page({
     this.setData({ busy: false });
   },
 
-  /**
-   * Mock mode: the server marks the order paid directly.
-   * WeChat Pay mode: the server returns `payment` params for
-   * wx.requestPayment; the order only becomes paid after the server verifies
-   * WeChat Pay, so we poll with ?sync=1 until it flips.
-   */
   async pay() {
     this.setData({ busy: true });
     try {
       const data = await request(`/api/orders/${encodeURIComponent(this.id)}/pay`, { method: 'POST' });
       if (!data.payment) {
         this.present(data.order);
-        toast('支付成功（模拟）');
+        toast(Number(data.amount) === 0 ? '订单已完成' : '支付成功');
         return;
       }
       await new Promise((resolve, reject) => wx.requestPayment({ ...data.payment, success: resolve, fail: reject }));
@@ -77,7 +81,7 @@ Page({
         if (synced.order.status !== 'pending_payment') { toast('支付成功'); return; }
         await new Promise((r) => setTimeout(r, 1500));
       }
-      toast('支付结果确认中，请稍后刷新');
+      toast('支付结果确认中，请稍后下拉刷新');
     } catch (error) {
       const cancelled = /cancel/.test((error && error.errMsg) || '');
       toast(cancelled ? '已取消支付' : (error.message || error.errMsg || '支付失败'));

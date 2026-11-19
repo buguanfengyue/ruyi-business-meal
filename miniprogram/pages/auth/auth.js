@@ -18,6 +18,10 @@ Page({
     }
   },
 
+  onAgreePrivacy() {
+    // WeChat privacy contract acknowledged; getPhoneNumber proceeds via bindgetphonenumber.
+  },
+
   async onGetPhoneNumber(event) {
     const code = event.detail && event.detail.code;
     if (!code) {
@@ -33,3 +37,4 @@ Page({
     }
   },
 });
+

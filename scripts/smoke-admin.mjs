@@ -42,7 +42,7 @@ try {
   await request('/api/auth/phone', { token: alice, method: 'POST', body: { code: 'p' } });
   await request('/api/session/register', { token: alice, method: 'POST', body: { nickname: 'Alice' } });
   const since = new Date().toISOString();
-  const order1 = (await request('/api/orders', { token: alice, method: 'POST', body: { items: [{ productId: 'a', quantity: 1 }], note: '=cmd()' } })).body.order;
+  const order1 = (await request('/api/orders', { token: alice, method: 'POST', body: { fulfillment: 'pickup', items: [{ productId: 'a', quantity: 1 }], note: '=cmd()' } })).body.order;
   assert.equal(order1.pickupNo, 1);
   assert.equal(order1.totals.total, 37.24);
   assert.equal((await request(`/api/orders/${order1.id}/pay`, { token: alice, method: 'POST' })).body.order.status, 'paid');
@@ -56,7 +56,7 @@ try {
   assert.equal(dash.body.dashboard.waitingAccept, 1);
   assert.equal(dash.body.dashboard.revenue, 37.24);
   assert.equal(dash.body.dashboard.customers, 1);
-  assert.equal(dash.body.dashboard.byFulfillment.delivery.orders, 1);
+  assert.equal(dash.body.dashboard.byFulfillment.pickup.orders, 1);
   const tabbed = await request('/api/admin/orders?tab=accept', { token: admin });
   assert.equal(tabbed.body.total, 1);
   assert.equal(tabbed.body.tabCounts.unpaid, 0);
@@ -72,7 +72,7 @@ try {
   assert.equal(detail.body.paymentEvents[0].kind, 'mock_paid');
 
   /* merchant cancels a paid order -> refund */
-  const order2 = (await request('/api/orders', { token: alice, method: 'POST', body: { items: [{ productId: 'd', quantity: 1 }] } })).body.order;
+  const order2 = (await request('/api/orders', { token: alice, method: 'POST', body: { fulfillment: 'pickup', items: [{ productId: 'd', quantity: 1 }] } })).body.order;
   assert.equal(order2.pickupNo, 2);
   await request(`/api/orders/${order2.id}/pay`, { token: alice, method: 'POST' });
   const cancelled = await request(`/api/admin/orders/${order2.id}/cancel`, { token: admin, method: 'POST', body: { reason: '食材售罄' } });
@@ -108,7 +108,7 @@ try {
   /* settings: pause the store */
   const settings = (await request('/api/admin/settings', { token: admin })).body.settings;
   await request('/api/admin/settings/store', { token: admin, method: 'PUT', body: { ...settings.store, accepting: false, notice: '今日休息' } });
-  const closed = await request('/api/orders', { token: alice, method: 'POST', body: { items: [{ productId: 'a', quantity: 1 }] } });
+  const closed = await request('/api/orders', { token: alice, method: 'POST', body: { fulfillment: 'pickup', items: [{ productId: 'a', quantity: 1 }] } });
   assert.equal(closed.status, 409);
   assert.equal(closed.body.error.message, '今日休息');
   await request('/api/admin/settings/store', { token: admin, method: 'PUT', body: settings.store });
@@ -135,7 +135,7 @@ try {
   assert.ok(csv.text.includes(`"'=cmd()"`), 'CSV 公式注入应被转义');
 
   /* auto-cancel of unpaid orders */
-  const stale = (await request('/api/orders', { token: alice, method: 'POST', body: { items: [{ productId: 'a', quantity: 1 }] } })).body.order;
+  const stale = (await request('/api/orders', { token: alice, method: 'POST', body: { fulfillment: 'pickup', items: [{ productId: 'a', quantity: 1 }] } })).body.order;
   app.db.run('UPDATE orders SET created_at = :old WHERE id = :id', { old: new Date(Date.now() - 16 * 60000).toISOString(), id: stale.id });
   await app.runJobs();
   assert.equal((await request(`/api/orders/${stale.id}`, { token: alice })).body.order.status, 'cancelled');
@@ -158,7 +158,7 @@ try {
   assert.equal((await request('/api/admin/settings', { token: admin })).body.settings.partner.commissionRate, 0.1);
 
   /* account deletion */
-  const active = (await request('/api/orders', { token: alice, method: 'POST', body: { items: [{ productId: 'a', quantity: 1 }] } })).body.order;
+  const active = (await request('/api/orders', { token: alice, method: 'POST', body: { fulfillment: 'pickup', items: [{ productId: 'a', quantity: 1 }] } })).body.order;
   assert.equal((await request('/api/me', { token: alice, method: 'DELETE' })).status, 409);
   await request(`/api/orders/${active.id}/cancel`, { token: alice, method: 'POST' });
   assert.equal((await request('/api/me', { token: alice, method: 'DELETE' })).status, 200);

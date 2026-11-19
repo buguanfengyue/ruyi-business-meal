@@ -75,7 +75,7 @@ const fakeBase = `http://127.0.0.1:${fake.address().port}`;
 const app = createApp({
   logger: { log() {}, warn() {}, error() {} },
   config: loadConfig({
-    DATABASE_PATH: ':memory:', SEED_DEMO: '0',
+    DATABASE_PATH: ':memory:', SEED_DEMO: '1',
     WECHAT_AUTH_MODE: 'wechat', WECHAT_APPID: APPID, WECHAT_APPSECRET: 'secret', WECHAT_API_BASE_URL: fakeBase,
     PAYMENT_MODE: 'wechat', WECHATPAY_MCHID: MCHID, WECHATPAY_CERT_SERIAL: 'MERCHANT_SERIAL',
     WECHATPAY_PRIVATE_KEY_PATH: path.join(dir, 'apiclient_key.pem'), WECHATPAY_APIV3_KEY: API_V3_KEY,
@@ -120,7 +120,7 @@ try {
   assert.equal((await request('/api/auth/login', { method: 'POST', body: { code: 'c1' } })).body.created, false, '同一 openid 复用同一用户');
   assert.equal((await request('/api/orders')).status, 401, '正式模式未登录拒绝');
 
-  const order = (await request('/api/orders', { token, method: 'POST', body: { items: [{ productId: 'a', quantity: 1 }], customer: { phone: '13800000000' } } })).body.order;
+  const order = (await request('/api/orders', { token, method: 'POST', body: { fulfillment: 'pickup', items: [{ productId: 'a', quantity: 1 }], customer: { phone: '13800000000' } } })).body.order;
   assert.equal(order.totals.total, 38, '未绑定手机号按原价');
 
   /* prepay + client signature */
@@ -144,7 +144,7 @@ try {
   assert.equal((await notify('TRANSACTION.SUCCESS', tx(order.id, 3800))).status, 204, '重复通知幂等');
 
   /* wrong amount is rejected */
-  const order2 = (await request('/api/orders', { token, method: 'POST', body: { items: [{ productId: 'd', quantity: 1 }], customer: { phone: '13800000000' } } })).body.order;
+  const order2 = (await request('/api/orders', { token, method: 'POST', body: { fulfillment: 'pickup', items: [{ productId: 'd', quantity: 1 }], customer: { phone: '13800000000' } } })).body.order;
   await request(`/api/orders/${order2.id}/pay`, { token, method: 'POST' });
   assert.equal((await notify('TRANSACTION.SUCCESS', tx(order2.id, 1))).status, 500);
   assert.equal((await request(`/api/orders/${order2.id}`, { token })).body.order.status, 'pending_payment', '金额不符不入账');
@@ -163,7 +163,7 @@ try {
   assert.equal((await request(`/api/orders/${order.id}`, { token })).body.order.refundStatus, 'success');
 
   /* unpaid order times out: closed at WeChat Pay, then cancelled */
-  const order3 = (await request('/api/orders', { token, method: 'POST', body: { items: [{ productId: 'a', quantity: 1 }], customer: { phone: '13800000000' } } })).body.order;
+  const order3 = (await request('/api/orders', { token, method: 'POST', body: { fulfillment: 'pickup', items: [{ productId: 'a', quantity: 1 }], customer: { phone: '13800000000' } } })).body.order;
   app.db.run('UPDATE orders SET created_at = :old WHERE id = :id', { old: new Date(Date.now() - 20 * 60000).toISOString(), id: order3.id });
   await app.runJobs();
   assert.equal((await request(`/api/orders/${order3.id}`, { token })).body.order.status, 'cancelled');

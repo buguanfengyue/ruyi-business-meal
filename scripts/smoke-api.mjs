@@ -41,11 +41,17 @@ try {
 
   const bootstrap = await request('/api/bootstrap');
   assert.equal(bootstrap.response.status, 200);
-  assert.equal(bootstrap.body.products.length, 4);
+  assert.equal(bootstrap.body.products.length, 3);
 
   const products = await request('/api/products?category=soup');
   assert.equal(products.response.status, 200);
   assert.equal(products.body.products[0].id, 'd');
+
+  const address = await request('/api/addresses', {
+    method: 'POST',
+    body: JSON.stringify({ name: '测试', phone: '15805320100', detail: '测试路 1 号' }),
+  });
+  assert.equal(address.response.status, 201);
 
   const order = await request('/api/orders', {
     method: 'POST',
@@ -53,6 +59,8 @@ try {
       items: [{ productId: 'a', quantity: 2 }, { productId: 'd', quantity: 1 }],
       customer: { phone: '15805320100', nickname: '本地测试' },
       fulfillment: 'delivery',
+      addressId: address.body.address.id,
+      schedule: '尽快送达',
       note: 'smoke test',
     }),
   });

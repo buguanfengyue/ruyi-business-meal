@@ -14,8 +14,10 @@
     "pages/points/points",
     "pages/bookings/bookings",
     "pages/info/info",
-    "pages/auth/auth"
+    "pages/auth/auth",
+    "pages/legal/legal"
   ],
+  "__usePrivacyCheck__": true,
   "window": {
     "navigationBarTitleText": "如一商务餐",
     "navigationBarBackgroundColor": "#ffffff",

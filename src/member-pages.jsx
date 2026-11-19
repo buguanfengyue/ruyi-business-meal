@@ -143,6 +143,6 @@ export function Points({back,navigate,toast}){
 
 export function Bookings({back,navigate,toast}){
   const [orders,setOrders]=useState(null);
-  useEffect(()=>{getOrders().then(d=>setOrders(d.orders.filter(o=>o.schedule&&o.schedule!=='立即取单'&&o.status!=='cancelled'))).catch(e=>{toast(e.message);setOrders([])})},[]);
+  useEffect(()=>{getOrders().then(d=>setOrders(d.orders.filter(o=>o.schedule&&o.schedule!=='尽快送达'&&o.schedule!=='立即取单'&&o.status!=='cancelled'))).catch(e=>{toast(e.message);setOrders([])})},[]);
   return <div className="page"><Header title="我的预约" onBack={()=>back('/me')}/>{orders===null?<Loading/>:orders.length?<div className="order-list">{orders.map(o=><button key={o.id} className="order-card" onClick={()=>navigate(`/orders/${o.id}`)}><div className="order-card-head"><b>预约 {o.schedule}</b><span className={`status-${o.status}`}>{o.statusText}</span></div><div className="order-card-items">{o.items.map(i=>`${i.name}×${i.quantity}`).join('、')}</div><div className="order-card-foot"><span>下单 {formatTime(o.createdAt)}</span><span>实付<b>{money(o.totals.total)}</b></span></div></button>)}</div>:<div className="empty"><div className="empty-icon">🗓</div><p>暂无预约，下单时可在“预约时间”中选择取餐时段</p><button onClick={()=>navigate('/menu')}>去点单</button></div>}</div>;
 }

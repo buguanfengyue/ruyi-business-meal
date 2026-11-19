@@ -102,7 +102,7 @@ export function GoodsManage() {
   );
 }
 
-const EMPTY = {name: '', categoryId: '', emoji: '🍱', description: '', oldPrice: '', price: '', sort: '0', available: true};
+const EMPTY = {name: '', categoryId: '', emoji: '🍱', description: '', imageUrl: '', oldPrice: '', price: '', sort: '0', available: true};
 
 export function GoodsAdd({query}) {
   const [tab, setTab] = useState('基本信息');
@@ -112,7 +112,7 @@ export function GoodsAdd({query}) {
   const [saving, setSaving] = useState(false);
   const editing = isEdit ? data?.products.find((p) => p.id === query.id) : null;
   React.useEffect(() => {
-    if (editing) setForm({name: editing.name, categoryId: editing.categoryId || '', emoji: editing.emoji, description: editing.description, oldPrice: String(editing.oldPrice), price: String(editing.price), sort: String(editing.sort), available: editing.available});
+    if (editing) setForm({name: editing.name, categoryId: editing.categoryId || '', emoji: editing.emoji, description: editing.description, imageUrl: editing.imageUrl || '', oldPrice: String(editing.oldPrice), price: String(editing.price), sort: String(editing.sort), available: editing.available});
   }, [editing?.id]);
   const set = (k) => (v) => setForm((f) => ({...f, [k]: v}));
   const categories = (data?.categories || []).filter((c) => c.id !== 'recommend');
@@ -126,7 +126,7 @@ export function GoodsAdd({query}) {
     const member = form.price === '' ? Math.round(list * 98) / 100 : Number(form.price);
     setSaving(true);
     try {
-      await api.saveProduct(isEdit ? query.id : null, {name: form.name, categoryId: form.categoryId, emoji: form.emoji, description: form.description, oldPrice: list, price: member, sort: Number(form.sort) || 0, available: form.available});
+      await api.saveProduct(isEdit ? query.id : null, {name: form.name, categoryId: form.categoryId, emoji: form.emoji, description: form.description, imageUrl: form.imageUrl || '', oldPrice: list, price: member, sort: Number(form.sort) || 0, available: form.available});
       toast(isEdit ? '商品已保存' : '商品已发布');
       go('/goods/goodsManage');
     } catch (e) {
@@ -145,7 +145,7 @@ export function GoodsAdd({query}) {
           <F label="商品类型" required><Radios options={['普通商品', '称重商品', '套餐', '优惠券']} /></F>
           <F label="商品名称" required><Input w="l" placeholder="请输入商品名称" suffix={`${form.name.length}/50`} value={form.name} onChange={(v) => set('name')(v.slice(0, 50))} /></F>
           <F label="所属分类" required><Select placeholder="请选择" options={categories.map((c) => ({value: c.id, label: c.label}))} value={form.categoryId} onChange={set('categoryId')} /><Lnk color="blue" onClick={() => go('/goods/classify')}>新建分类</Lnk></F>
-          <F label="商品主图" help="建议尺寸：小图500*500px，大图550*280px，最多8张（图片上传待接入对象存储，暂用表情图标）"><Upload /><span className="thumb" style={{width: 64, height: 64, fontSize: 34}}>{form.emoji || '🍽'}</span><Input w="xs" value={form.emoji} onChange={set('emoji')} placeholder="图标" /></F>
+          <F label="商品主图" help="填写可公网访问的 HTTPS 图片地址；对象存储上传后续接入"><Input w="l" value={form.imageUrl || ''} onChange={set('imageUrl')} placeholder="https://..." /><span className="thumb" style={{width: 64, height: 64, fontSize: 34}}>{form.emoji || '🍽'}</span><Input w="xs" value={form.emoji} onChange={set('emoji')} placeholder="图标" /></F>
           <F label="商品规格图" q="点餐页规格弹窗展示" help="建议尺寸：738 * 396px，最多7张"><Upload /></F>
           <F label="商品标签" help="建议使用：最多5个"><Btn onClick={() => go('/goods/goods_label')}>未设置标签，去设置 ›</Btn></F>
           <F label="商品描述"><textarea className="ta" rows={3} placeholder="请输入商品描述" value={form.description} onChange={(e) => set('description')(e.target.value.slice(0, 300))} /></F>

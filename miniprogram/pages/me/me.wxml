@@ -10,10 +10,6 @@
   </view>
   <text class="member-more">查看详情 ›</text>
 </navigator>
-<view class="balance">
-  <view>账户余额</view><view class="balance-num">{{balanceText}}</view>
-  <navigator class="recharge" url="/pages/info/info?kind=recharge">充值</navigator>
-</view>
 <view class="list">
   <view wx:for="{{rows}}" wx:key="title" class="row" data-url="{{item.url}}" data-tab="{{item.tab}}" bindtap="go">
     <view class="row-left">
@@ -28,6 +24,22 @@
       <text>联系商家</text>
     </view>
     <text class="label">{{storePhone}} ›</text>
+  </view>
+  <navigator class="row" url="/pages/legal/legal?kind=terms">
+    <view class="row-left"><text>用户协议</text></view>
+    <text class="label">›</text>
+  </navigator>
+  <navigator class="row" url="/pages/legal/legal?kind=privacy">
+    <view class="row-left"><text>隐私政策</text></view>
+    <text class="label">›</text>
+  </navigator>
+  <view class="row" bindtap="logout">
+    <view class="row-left"><text>退出登录</text></view>
+    <text class="label">›</text>
+  </view>
+  <view class="row danger" bindtap="deleteAccount">
+    <view class="row-left"><text>注销账号</text></view>
+    <text class="label">›</text>
   </view>
 </view>
 

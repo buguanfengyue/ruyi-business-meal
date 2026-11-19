@@ -1,11 +1,22 @@
 <view class="page">
   <view class="card intro">
     <view class="brand title">如一商务餐</view>
-    <view class="muted">本地开发阶段使用 mock；切换正式环境后，code 由服务端调用微信接口完成授权。</view>
+    <view class="muted">登录后可同步订单、会员与优惠券。授权手机号后即可享受会员价。</view>
+    <view class="legal-line">
+      登录即表示已阅读
+      <navigator url="/pages/legal/legal?kind=terms" class="link">《用户协议》</navigator>
+      与
+      <navigator url="/pages/legal/legal?kind=privacy" class="link">《隐私政策》</navigator>
+    </view>
   </view>
   <view class="card">
     <button class="primary" bindtap="login" loading="{{loading}}">{{loggedIn ? '重新登录' : '微信登录'}}</button>
-    <button wx:if="{{loggedIn}}" open-type="getPhoneNumber" bindgetphonenumber="onGetPhoneNumber">授权手机号</button>
+    <button
+      wx:if="{{loggedIn}}"
+      open-type="getPhoneNumber"
+      bindagreeprivacyauthorization="onAgreePrivacy"
+      bindgetphonenumber="onGetPhoneNumber"
+    >授权手机号</button>
     <view wx:if="{{message}}" class="message">{{message}}</view>
   </view>
   <view wx:if="{{user}}" class="card">

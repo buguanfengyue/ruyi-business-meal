@@ -92,7 +92,7 @@ try {
 
   const menu = page('menu');
   await menu.onLoad();
-  assert.equal(menu.data.list.length, 4);
+  assert.equal(menu.data.list.length, 3);
   menu.pickCat(ev({ id: 'soup' })); assert.equal(menu.data.list.length, 1);
   menu.onSearch(ev({}, '58元')); assert.equal(menu.data.list.length, 1);
   menu.onSearch(ev({}, ''));

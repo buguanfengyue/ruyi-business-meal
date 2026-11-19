@@ -7,7 +7,7 @@ Page({
     try {
       const data = await request('/api/orders');
       const orders = data.orders
-        .filter((o) => o.schedule && o.schedule !== '立即取单' && o.status !== 'cancelled')
+        .filter((o) => o.schedule && o.schedule !== '尽快送达' && o.schedule !== '立即取单' && o.status !== 'cancelled')
         .map((o) => Object.assign({}, o, { summary: o.items.map((i) => `${i.name}×${i.quantity}`).join('、'), totalText: money(o.totals.total), timeText: formatTime(o.createdAt) }));
       this.setData({ orders, loading: false });
     } catch (error) {

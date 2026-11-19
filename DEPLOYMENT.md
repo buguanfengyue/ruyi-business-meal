@@ -17,6 +17,7 @@
 | 事项 | 用途 | 对应配置 |
 | --- | --- | --- |
 | 小程序 AppID + AppSecret（你有管理员权限） | 微信登录、手机号授权 | `WECHAT_APPID` `WECHAT_APPSECRET` |
+| **微信小程序备案**（工信部，新号发布硬性要求） | 提交审核 / 全量发布 | 微信公众平台 → 备案 |
 | 云服务器 + 域名 + ICP 备案 + HTTPS 证书 | 小程序只能访问已备案 HTTPS 域名 | `deploy/nginx.conf` |
 | 小程序后台「request 合法域名」填 `https://api.example.com` | 允许小程序请求 API | 小程序后台 |
 | 微信支付商户号，并与小程序 AppID 关联 | 收款、退款 | `WECHATPAY_MCHID` |
@@ -49,6 +50,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now ruyi-api ruyi-backup.timer
 
 # 6. 配置 nginx 与 HTTPS 证书
+#    Ubuntu 22.04 默认 nginx 1.18：配置已使用 `listen 443 ssl http2;`（不要用 `http2 on;`）
 sudo cp deploy/nginx.conf /etc/nginx/sites-enabled/ruyi.conf && sudo nginx -t && sudo systemctl reload nginx
 curl https://api.example.com/api/health
 ```
@@ -69,7 +71,7 @@ curl https://api.example.com/api/health
 2. `POST /api/orders/:id/pay`：mock 模式直接支付成功；wechat 模式返回 `payment` 参数，小程序调用 `wx.requestPayment(payment)`。
 3. 微信支付回调 `/api/pay/notify` 验签、解密、核对金额后才标记为 `paid`（待接单）。小程序支付完成后请求 `GET /api/orders/:id?sync=1`，回调延迟时服务端主动查单。
 4. 商户后台：接单 → `preparing`（备餐中）→ 完成 → `completed`。
-5. 未支付超过 `ORDER_PAY_TIMEOUT_MINUTES` 自动关单取消；顾客在接单前可取消，商户可取消任意未完成订单，已支付订单自动发起退款，失败的退款每分钟重试并可在后台手动重试。
+5. 未支付超过 `ORDER_PAY_TIMEOUT_MINUTES` 自动关单取消；顾客在接单前可取消，商户可取消任意未完成订单，已支付订单自动发起退款；`pending`/`failed` 退款每分钟自动重试，也可在后台手动重试。0 元订单直接记为已支付（`free`），不调用微信支付。
 
 ## 六、上线前检查清单
 

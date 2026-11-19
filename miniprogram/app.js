@@ -37,6 +37,13 @@ App({
     wx.setStorageSync('ruyiUser', user);
   },
 
+  clearSession() {
+    this.globalData.token = '';
+    this.globalData.user = null;
+    wx.removeStorageSync('ruyiToken');
+    wx.removeStorageSync('ruyiUser');
+  },
+
   updateCart(productId, delta) {
     const cart = Object.assign({}, this.globalData.cart);
     const next = Math.min(99, Math.max(0, (cart[productId] || 0) + delta));

@@ -2,7 +2,11 @@
 <view wx:elif="{{!order}}" class="empty">加载中…</view>
 <block wx:else>
   <view class="page-pad">
-    <view class="card hero status-{{order.status}}"><view class="status">{{order.statusText}}</view><view class="label">{{order.hint}}</view></view>
+    <view class="card hero status-{{order.status}}">
+      <view class="status">{{order.statusText}}</view>
+      <view class="label">{{order.hint}}</view>
+      <view wx:if="{{order.refundStatusText}}" class="label">退款状态：{{order.refundStatusText}}</view>
+    </view>
     <view class="card">
       <view class="bold">如一商务餐</view>
       <view wx:for="{{order.items}}" wx:key="productId" class="line"><text>{{item.name}} × {{item.quantity}}</text><text class="bold">¥{{item.lineText}}</text></view>

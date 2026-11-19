@@ -1,9 +1,9 @@
 <view class="tabs">
-  <view wx:for="{{tabs}}" wx:key="*this" class="tab {{active === index ? 'active' : ''}}" data-index="{{index}}" bindtap="pickTab">{{item}}</view>
+  <view wx:for="{{tabs}}" wx:key="id" class="tab {{active === index ? 'active' : ''}}" data-index="{{index}}" bindtap="pickTab">{{item.label}}</view>
 </view>
 <view wx:if="{{loading}}" class="empty">加载中…</view>
-<view wx:elif="{{active === 0 && orders.length}}" class="list">
-  <view wx:for="{{orders}}" wx:key="id" class="card order" data-id="{{item.id}}" bindtap="open">
+<view wx:elif="{{filtered.length}}" class="list">
+  <view wx:for="{{filtered}}" wx:key="id" class="card order" data-id="{{item.id}}" bindtap="open">
     <view class="head"><text class="bold">如一商务餐</text><text class="status-{{item.status}}">{{item.statusText}}</text></view>
     <view class="summary">{{item.summary}}</view>
     <view class="foot"><text>{{item.timeText}}</text><text>共{{item.count}}件 实付<text class="bold big">¥{{item.totalText}}</text></text></view>
