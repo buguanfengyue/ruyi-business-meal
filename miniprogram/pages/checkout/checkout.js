@@ -159,6 +159,8 @@ Page({
       return;
     }
     this.setData({ submitting: true });
+    // Stable for this submit attempt so network retries do not create duplicate orders.
+    const requestId = `mp-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
     try {
       const app = getApp();
       const data = await request('/api/orders', {
@@ -171,6 +173,7 @@ Page({
           note: this.data.note,
           couponId: this.data.couponId || undefined,
           addressId,
+          requestId,
         },
       });
       app.clearCart();

@@ -52,14 +52,23 @@ try {
   assert.equal(products.response.status, 200);
   assert.equal(products.body.products[0].id, 'd');
 
+  const login = await request('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ code: 'smoke-api-user' }),
+  });
+  assert.equal(login.response.status, 200);
+  const authHeaders = { authorization: `Bearer ${login.body.session.token}` };
+
   const address = await request('/api/addresses', {
     method: 'POST',
+    headers: authHeaders,
     body: JSON.stringify({ name: '测试', phone: '15805320100', detail: '测试路 1 号' }),
   });
   assert.equal(address.response.status, 201);
 
   const order = await request('/api/orders', {
     method: 'POST',
+    headers: authHeaders,
     body: JSON.stringify({
       items: [{ productId: 'a', quantity: 2 }, { productId: 'd', quantity: 1 }],
       customer: { phone: '15805320100', nickname: '本地测试' },
@@ -67,6 +76,7 @@ try {
       addressId: address.body.address.id,
       schedule: '尽快送达',
       note: 'smoke test',
+      requestId: 'smoke-api-order-1',
     }),
   });
   assert.equal(order.response.status, 201);
@@ -74,7 +84,7 @@ try {
   assert.equal(order.body.order.items.length, 2);
   assert.equal(order.body.order.totals.total, 101.92);
 
-  const orders = await request('/api/orders');
+  const orders = await request('/api/orders', { headers: authHeaders });
   assert.equal(orders.response.status, 200);
   assert.equal(orders.body.total, 1);
 

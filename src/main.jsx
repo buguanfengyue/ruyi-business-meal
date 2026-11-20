@@ -113,7 +113,7 @@ function Checkout({products,store,user,cart,clearCart,navigate,back,refreshUser,
     if(!/^1\d{10}$/.test(phone)){toast('请填写有效的 11 位手机号');return}
     setSubmitting(true);
     try{
-      const data=await createOrder({items:cartItems,customer:{phone,nickname:user.nickname},fulfillment:'delivery',schedule,note,couponId,addressId});
+      const data=await createOrder({items:cartItems,customer:{phone,nickname:user.nickname},fulfillment:'delivery',schedule,note,couponId,addressId,requestId:`web-${Date.now()}-${Math.random().toString(36).slice(2,10)}`});
       clearCart();refreshUser();navigate(`/orders/${data.order.id}`,{replace:true});
     }catch(e){toast(`下单失败：${e.message}`);setSubmitting(false)}
   };

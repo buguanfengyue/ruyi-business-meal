@@ -79,22 +79,22 @@ let active = startServer();
 try {
   await ready();
 
-  // A1/A2: mock + SEED_DEMO silently falls back to demo-user when no/invalid session.
+  // A1/A2/A4: required routes must 401 without a valid session (no demo fallback).
   {
     const r = await call('/api/orders');
     if (r.status === 401 && r.body?.error?.code === 'AUTH_REQUIRED') {
       record('A1', 'PASS', 'status=401 AUTH_REQUIRED');
     } else {
-      record('A1', 'GAP', `mock demo 回落：无 token 仍 ${r.status}（user=${r.body?.orders ? 'demo-orders' : JSON.stringify(r.body).slice(0, 80)}）`);
+      record('A1', 'FAIL', `无 token 期望 401：status=${r.status}`);
     }
   }
 
   {
-    const r = await call('/api/me', { token: 'ruyi_forged_token_xxx' });
-    if (r.status === 401) {
-      record('A2', 'PASS', 'status=401');
+    const r = await call('/api/orders', { token: 'ruyi_forged_token_xxx' });
+    if (r.status === 401 && r.body?.error?.code === 'AUTH_REQUIRED') {
+      record('A2', 'PASS', 'status=401 AUTH_REQUIRED');
     } else {
-      record('A2', 'GAP', `伪造 token 未 401：status=${r.status} authenticated=${r.body?.authenticated} user=${r.body?.user?.id}`);
+      record('A2', 'FAIL', `伪造 token 期望 401：status=${r.status}`);
     }
   }
 
@@ -103,11 +103,11 @@ try {
     await call('/api/auth/logout', { token, method: 'POST' });
     const me = await call('/api/me', { token });
     const orders = await call('/api/orders', { token });
-    // /api/me 设计上可返回 authenticated:false；受保护接口在 mock 下仍会回落 demo。
+    // /api/me stays soft (authenticated:false); protected routes must 401.
     if (orders.status === 401) {
       record('A4', 'PASS', `/api/me authenticated=${me.body?.authenticated}; /api/orders=401`);
     } else {
-      record('A4', 'GAP', `退出后旧 token：/api/me authenticated=${me.body?.authenticated} user=${me.body?.user?.id}; /api/orders=${orders.status}`);
+      record('A4', 'FAIL', `退出后旧 token：/api/me authenticated=${me.body?.authenticated}; /api/orders=${orders.status}`);
     }
   }
 

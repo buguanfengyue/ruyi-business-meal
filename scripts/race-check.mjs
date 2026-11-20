@@ -95,24 +95,25 @@ try {
   const after = (await call('/api/coupons', { token })).body.coupons.find((c) => c.id === coupon.id);
   assert.equal(after.status, 'used', '券最终应为 used');
 
-  // Same user concurrent create without coupon — may create duplicates (known gap D10).
-  const dupBody = {
+  // D10: same requestId must collapse concurrent creates to one order.
+  const idemBody = {
     fulfillment: 'pickup',
     schedule: '尽快送达',
     items: [{ productId: 'd', quantity: 1 }],
     customer: { phone: '13800000001' },
+    requestId: `race-d10-${Date.now()}`,
   };
   const dups = await Promise.all(
-    Array.from({ length: 10 }, () => call('/api/orders', { token, method: 'POST', body: dupBody })),
+    Array.from({ length: 10 }, () => call('/api/orders', { token, method: 'POST', body: idemBody })),
   );
   const dupCounts = dups.reduce((acc, r) => {
     acc[r.status] = (acc[r.status] || 0) + 1;
     return acc;
   }, {});
-  console.log('D10 concurrent create without idempotency key x10:', dupCounts);
-  if ((dupCounts[201] || 0) > 1) {
-    console.warn(`[known-gap] 无幂等键并发下单产生 ${dupCounts[201]} 单（文档 D10）`);
-  }
+  const orderIds = new Set(dups.map((r) => r.body?.order?.id).filter(Boolean));
+  console.log('D10 concurrent create with requestId x10:', dupCounts, `uniqueOrders=${orderIds.size}`);
+  assert.equal(orderIds.size, 1, `幂等键失效：产生 ${orderIds.size} 个订单`);
+  assert.equal((dupCounts[201] || 0) + (dupCounts[200] || 0), 10, '仅允许 200/201');
 
   console.log('Race check passed');
 } catch (error) {

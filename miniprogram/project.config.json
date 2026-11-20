@@ -5,7 +5,7 @@
   "projectname": "ruyi-business-meal",
   "appid": "wxf532879207c37127",
   "setting": {
-    "urlCheck": false,
+    "urlCheck": true,
     "es6": true,
     "enhance": true,
     "minified": true,

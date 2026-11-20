@@ -5,18 +5,18 @@ import { yuan } from './services.mjs';
 /** Customer-facing API used by the mini-program and the web replica. */
 export function registerPublicRoutes(router, { db, config, services, auth, payments, limiter, ip }) {
   /**
-   * Resolve the caller. A valid bearer session always wins. Without one, mock
-   * mode falls back to the demo user so curl/smoke tests keep working; wechat
-   * mode fails closed for anything user-scoped.
+   * Resolve the caller. A valid bearer session always wins. When `required`,
+   * missing/invalid sessions always 401 (no demo fallback). Optional routes in
+   * mock mode may still fall back to demo-user for curl convenience.
    */
   function currentUser(req, { required = false } = {}) {
     const session = auth.sessionFromRequest(req);
     if (session) return session.user;
+    if (required) throw httpError(401, 'AUTH_REQUIRED', '请先完成微信登录');
     if (auth.mode === 'mock') {
       const demo = services.getUser('demo-user');
       if (demo) return demo;
     }
-    if (required) throw httpError(401, 'AUTH_REQUIRED', '请先完成微信登录');
     return null;
   }
 
@@ -161,8 +161,8 @@ export function registerPublicRoutes(router, { db, config, services, auth, payme
   router.post('/api/orders', async ({ req }) => {
     const user = currentUser(req, { required: true });
     limiter.check(`order:${user.id}`);
-    const row = services.createOrder(user, await readJson(req));
-    return { status: 201, order: services.presentOrder(row) };
+    const { row, created } = services.createOrder(user, await readJson(req));
+    return { status: created ? 201 : 200, order: services.presentOrder(row) };
   });
 
   router.get('/api/orders/:id', async ({ req, params, query }) => {

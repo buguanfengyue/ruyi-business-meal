@@ -156,6 +156,12 @@ const MIGRATIONS = [
   );
   CREATE INDEX audit_created ON audit_log(created_at);
   `,
+  // Client-supplied idempotency key for create-order retries (unique per user when set).
+  `
+  ALTER TABLE orders ADD COLUMN client_request_id TEXT;
+  CREATE UNIQUE INDEX orders_user_client_request ON orders(user_id, client_request_id)
+    WHERE client_request_id IS NOT NULL;
+  `,
 ];
 
 // node:sqlite rejects unknown names, undefined and booleans. Bind exactly the

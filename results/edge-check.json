@@ -1,23 +1,23 @@
 {
-  "at": "2026-11-20T07:02:27.762Z",
-  "pass": 16,
-  "gap": 4,
+  "at": "2026-11-20T07:57:55.120Z",
+  "pass": 20,
+  "gap": 0,
   "fail": 0,
   "results": [
     {
       "id": "A1",
-      "status": "GAP",
-      "detail": "mock demo 回落：无 token 仍 200（user=demo-orders）"
+      "status": "PASS",
+      "detail": "status=401 AUTH_REQUIRED"
     },
     {
       "id": "A2",
-      "status": "GAP",
-      "detail": "伪造 token 未 401：status=200 authenticated=false user=demo-user"
+      "status": "PASS",
+      "detail": "status=401 AUTH_REQUIRED"
     },
     {
       "id": "A4",
-      "status": "GAP",
-      "detail": "退出后旧 token：/api/me authenticated=false user=demo-user; /api/orders=200"
+      "status": "PASS",
+      "detail": "/api/me authenticated=false; /api/orders=401"
     },
     {
       "id": "A5",
@@ -46,8 +46,8 @@
     },
     {
       "id": "B4",
-      "status": "GAP",
-      "detail": "0/100/1.5 已拒；字符串 \"2\" 被 Number() 接受（文档期望 INVALID_QUANTITY）。0→400/INVALID_QUANTITY; 100→400/INVALID_QUANTITY; 1.5→400/INVALID_QUANTITY; \"2\"→200/-"
+      "status": "PASS",
+      "detail": "0→400/INVALID_QUANTITY; 100→400/INVALID_QUANTITY; 1.5→400/INVALID_QUANTITY; \"2\"→400/INVALID_QUANTITY"
     },
     {
       "id": "B5",

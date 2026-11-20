@@ -209,11 +209,14 @@ export function createServices({ db, config }) {
     const seen = new Set();
     const items = rawItems.map((raw) => {
       const id = String(raw?.productId ?? raw?.id ?? '');
-      const quantity = Number(raw?.quantity ?? raw?.count);
+      const quantity = raw?.quantity ?? raw?.count;
       const product = db.one('SELECT * FROM products WHERE id = :id', { id });
       if (!product) throw httpError(400, 'PRODUCT_NOT_FOUND', `商品不存在：${id || '未提供商品 ID'}`);
       if (!product.available) throw httpError(409, 'PRODUCT_UNAVAILABLE', `商品已下架：${product.name}`);
-      if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) throw httpError(400, 'INVALID_QUANTITY', `商品数量必须是 1-99 的整数：${product.name}`);
+      // Reject string/float quantities — clients must send a JSON number 1–99.
+      if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
+        throw httpError(400, 'INVALID_QUANTITY', `商品数量必须是 1-99 的整数：${product.name}`);
+      }
       if (seen.has(id)) throw httpError(400, 'DUPLICATE_PRODUCT', `商品不能重复传入：${id}`);
       seen.add(id);
       // Line totals use the list price; the member discount applies once on the subtotal.
@@ -357,8 +360,16 @@ export function createServices({ db, config }) {
     // Accept legacy "立即取单" from older clients as "尽快送达".
     const schedule = scheduleRaw === '立即取单' ? '尽快送达' : scheduleRaw;
     if (!ALLOWED_SCHEDULES.has(schedule)) throw httpError(400, 'INVALID_SCHEDULE', '预约时间不在可选时段内');
+    const clientRequestId = str(body.requestId || body.clientRequestId, 64) || null;
 
     return db.tx(() => {
+      if (clientRequestId) {
+        const existing = db.one(
+          'SELECT * FROM orders WHERE user_id = :userId AND client_request_id = :clientRequestId',
+          { userId: user.id, clientRequestId },
+        );
+        if (existing) return { row: existing, created: false };
+      }
       const quote = calculateQuote(user, rawItems, body.couponId);
       let address = null;
       if (body.addressId) {
@@ -374,9 +385,9 @@ export function createServices({ db, config }) {
       const id = `RY${date.replaceAll('-', '')}${randomUUID().replaceAll('-', '').slice(0, 8).toUpperCase()}`;
       const now = nowIso();
       db.run(`INSERT INTO orders (id, user_id, pickup_no, business_date, status, fulfillment, schedule, note, customer_phone, customer_nickname,
-          address_json, items_json, coupon_id, coupon_title, subtotal_fen, discount_fen, coupon_discount_fen, total_fen, member_level, created_at, updated_at)
+          address_json, items_json, coupon_id, coupon_title, subtotal_fen, discount_fen, coupon_discount_fen, total_fen, member_level, client_request_id, created_at, updated_at)
         VALUES (:id, :userId, :pickupNo, :date, 'pending_payment', :fulfillment, :schedule, :note, :phone, :nickname,
-          :address, :items, :couponId, :couponTitle, :subtotal, :discount, :couponDiscount, :total, :level, :now, :now)`, {
+          :address, :items, :couponId, :couponTitle, :subtotal, :discount, :couponDiscount, :total, :level, :clientRequestId, :now, :now)`, {
         id, userId: user.id, pickupNo, date,
         fulfillment,
         schedule,
@@ -386,10 +397,10 @@ export function createServices({ db, config }) {
         items: JSON.stringify(quote.items),
         couponId: quote.coupon?.id, couponTitle: quote.coupon?.title,
         subtotal: quote.subtotalFen, discount: quote.discountFen, couponDiscount: quote.couponDiscountFen, total: quote.totalFen,
-        level: quote.member.level, now,
+        level: quote.member.level, clientRequestId, now,
       });
       if (quote.coupon) db.run('UPDATE coupons SET used_by = :id WHERE id = :couponId', { id, couponId: quote.coupon.id });
-      return getOrderRow(id);
+      return { row: getOrderRow(id), created: true };
     });
   }
 
