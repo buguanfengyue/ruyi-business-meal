@@ -96,6 +96,8 @@ function createWechatPay({ config, services, logger }) {
       throw httpError(502, 'WECHATPAY_UNREACHABLE', '微信支付暂时无法访问，请稍后重试');
     }
     const text = await response.text();
+    // WeChat Pay support traces a request by its Request-ID; keep it in logs.
+    const requestId = response.headers.get('request-id') || '';
     const ok = verify({
       timestamp: response.headers.get('wechatpay-timestamp'),
       nonceStr: response.headers.get('wechatpay-nonce'),
@@ -106,11 +108,14 @@ function createWechatPay({ config, services, logger }) {
     let data = {};
     try { data = text ? JSON.parse(text) : {}; } catch { data = {}; }
     if (!response.ok) {
-      logger.error?.('[wechat-pay] api error', path, response.status, data.code);
-      throw httpError(502, 'WECHATPAY_API_ERROR', `微信支付调用失败（${data.code || response.status}）`, { wechatCode: data.code });
+      logger.error?.('[wechat-pay] api error', path, response.status, data.code, `request-id=${requestId}`);
+      throw httpError(502, 'WECHATPAY_API_ERROR', `微信支付调用失败（${data.code || response.status}）`, { wechatCode: data.code, requestId });
     }
     // Only trust successful responses that carry a valid WeChat Pay signature.
-    if (!ok) throw httpError(502, 'WECHATPAY_BAD_SIGNATURE', '微信支付响应验签失败');
+    if (!ok) {
+      logger.error?.('[wechat-pay] bad response signature', path, `request-id=${requestId}`);
+      throw httpError(502, 'WECHATPAY_BAD_SIGNATURE', '微信支付响应验签失败');
+    }
     return { status: response.status, data };
   }
 

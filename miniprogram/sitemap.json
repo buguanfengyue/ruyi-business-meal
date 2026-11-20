@@ -1,4 +1,9 @@
 {
-  "desc": "如一商务餐本地开发 sitemap",
-  "rules": []
+  "desc": "如一商务餐 sitemap：允许微信搜索收录页面（默认规则）",
+  "rules": [
+    {
+      "action": "allow",
+      "page": "*"
+    }
+  ]
 }

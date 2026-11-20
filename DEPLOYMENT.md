@@ -55,6 +55,33 @@ curl https://api.example.com/api/health
 
 生产环境下若仍是 mock 登录或 mock 支付，服务会**拒绝启动**（防止误上线）；内部测试确需时设置 `ALLOW_MOCK_IN_PRODUCTION=1`。
 
+### 当前服务器（2026-11-03 部署记录）
+
+- 腾讯云 `123.206.227.187`，OpenCloudOS 9.6（用 `dnf`，不是 apt），域名 `aftwy007.com`（`www` 跳转到主域名）。
+- 已预装宝塔面板（8888 端口）。nginx 用的是系统签名包（宝塔把 nginx 从 dnf 里排除了，安装与升级都要加 `--disableexcludes=main`）。**不要在宝塔里安装 nginx / LNMP**，否则会抢 80 端口。
+- Node 24 LTS：`/usr/local/lib/nodejs/current`，已链接到 `/usr/bin/node`。
+- 站点配置 `/etc/nginx/conf.d/ruyi.conf`；Let's Encrypt 证书由 `certbot-renew.timer` 自动续期，续期后自动重载 nginx。
+- 本机 `~/.ssh/config` 里有别名 `ruyi-server`（密钥 `~/.ssh/ruyi.pem`）。
+
+```bash
+# 填写密钥（输入时不显示、不经过聊天），例如 AppSecret、APIv3 密钥
+ssh -t ruyi-server ruyi-env-set WECHAT_APPSECRET
+ssh ruyi-server systemctl restart ruyi-api
+
+# 更新代码（本机执行）
+npm run build
+rsync -az --delete --chmod=Da+rx,Fa+r -e ssh server scripts dist deploy package.json ruyi-server:/srv/ruyi/
+ssh ruyi-server systemctl restart ruyi-api
+
+# 以 ruyi 用户运行脚本（例如创建商户管理员，会提示输入密码）
+ssh -t ruyi-server systemd-run --pty --wait --collect --uid=ruyi -p EnvironmentFile=/etc/ruyi/ruyi.env -p WorkingDirectory=/srv/ruyi /usr/bin/node scripts/admin.mjs create boss
+
+# 日志
+ssh ruyi-server journalctl -u ruyi-api -n 100 --no-pager
+```
+
+微信支付证书放到 `/etc/ruyi/certs/`（`apiclient_key.pem`、`pub_key.pem`），属主 `root:ruyi`、权限 `640`。
+
 ## 四、数据与备份
 
 - 所有数据在 `DATABASE_PATH`（默认 `data/ruyi.db`）。金额以“分”整数存储。
