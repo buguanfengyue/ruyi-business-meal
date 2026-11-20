@@ -1,0 +1,108 @@
+{
+  "at": "2026-11-20T07:02:27.762Z",
+  "pass": 16,
+  "gap": 4,
+  "fail": 0,
+  "results": [
+    {
+      "id": "A1",
+      "status": "GAP",
+      "detail": "mock demo 回落：无 token 仍 200（user=demo-orders）"
+    },
+    {
+      "id": "A2",
+      "status": "GAP",
+      "detail": "伪造 token 未 401：status=200 authenticated=false user=demo-user"
+    },
+    {
+      "id": "A4",
+      "status": "GAP",
+      "detail": "退出后旧 token：/api/me authenticated=false user=demo-user; /api/orders=200"
+    },
+    {
+      "id": "A5",
+      "status": "PASS",
+      "detail": "user=mock_dual-session tokensDistinct=true"
+    },
+    {
+      "id": "A7",
+      "status": "PASS",
+      "detail": "status=400 code=INVALID_PHONE_CODE"
+    },
+    {
+      "id": "B1",
+      "status": "PASS",
+      "detail": "status=400"
+    },
+    {
+      "id": "B2",
+      "status": "PASS",
+      "detail": "status=413"
+    },
+    {
+      "id": "B3",
+      "status": "PASS",
+      "detail": "status=400 code=INVALID_ADDRESS_NAME"
+    },
+    {
+      "id": "B4",
+      "status": "GAP",
+      "detail": "0/100/1.5 已拒；字符串 \"2\" 被 Number() 接受（文档期望 INVALID_QUANTITY）。0→400/INVALID_QUANTITY; 100→400/INVALID_QUANTITY; 1.5→400/INVALID_QUANTITY; \"2\"→200/-"
+    },
+    {
+      "id": "B5",
+      "status": "PASS",
+      "detail": "status=400"
+    },
+    {
+      "id": "B6",
+      "status": "PASS",
+      "detail": "status=400 code=PRODUCT_NOT_FOUND"
+    },
+    {
+      "id": "B6b",
+      "status": "PASS",
+      "detail": "adminPut=200 quote=409 code=PRODUCT_UNAVAILABLE"
+    },
+    {
+      "id": "B7",
+      "status": "PASS",
+      "detail": "status=400"
+    },
+    {
+      "id": "B8",
+      "status": "PASS",
+      "detail": "status=400"
+    },
+    {
+      "id": "B9",
+      "status": "PASS",
+      "detail": "code=ADDRESS_NOT_FOUND"
+    },
+    {
+      "id": "B10",
+      "status": "PASS",
+      "detail": "status=404"
+    },
+    {
+      "id": "C6",
+      "status": "PASS",
+      "detail": "status=404 code=REDEEM_CODE_NOT_FOUND"
+    },
+    {
+      "id": "F2",
+      "status": "PASS",
+      "detail": "relogin=200 invitedBefore=0 after=0"
+    },
+    {
+      "id": "E1",
+      "status": "PASS",
+      "detail": "status=409 code=STORE_CLOSED"
+    },
+    {
+      "id": "S9",
+      "status": "PASS",
+      "detail": "login statuses=200,200,200,200,200,429,429,429 limited=3"
+    }
+  ]
+}

@@ -2,10 +2,18 @@
   <image class="hero-img" src="/images/ui/invite-banner.jpg" mode="aspectFill" />
   <view class="call"><view class="c1">点击下方</view><view class="c2">邀请好友</view><view>↓</view></view>
 </view>
-<view wx:if="{{!data}}" class="empty">加载中…</view>
-<block wx:else>
+<view wx:if="{{needLogin}}" class="empty">
+  <view>登录后查看邀请奖励并分享给好友</view>
+  <button class="btn-red" bindtap="goAuth">去登录</button>
+</view>
+<view wx:elif="{{loading}}" class="empty">加载中…</view>
+<view wx:elif="{{error}}" class="empty">
+  <view>{{error}}</view>
+  <button class="btn-red" bindtap="load">点击重试</button>
+</view>
+<block wx:elif="{{data}}">
   <view class="panel">
-    <button class="share" open-type="share">邀请好友</button>
+    <button class="share" open-type="share">邀请好友 · 发送给微信好友</button>
     <view class="h">新用户将获得</view>
     <view class="coupon">
       <view class="left"><view class="amt"><text class="yen">¥</text>{{data.newUserReward.amountText}}</view><view class="tiny">满¥{{data.newUserReward.thresholdText}}可用</view></view>

@@ -3,23 +3,40 @@ const { money, maskPhone, toast } = require('../../utils/format');
 
 Page({
   data: {
-    user: null,
+    user: getApp().globalData.user || null,
     phoneText: '',
     rows: [],
+    loggedOut: false,
+    error: '',
     showRegister: false,
     nickname: '',
     registering: false,
+    memberName: '会员中心',
+    storePhone: getApp().globalData.storePhone,
   },
 
   onShow() { this.load(); },
 
   async load() {
+    this.setData({ error: '' });
     try {
       await ensureLogin();
       const { user } = await request('/api/me');
       getApp().setUser(user);
       this.present(user);
+      this.setData({ loggedOut: false });
     } catch (error) {
+      if (error.code === 'LOGGED_OUT') {
+        this.setData({
+          loggedOut: true,
+          user: null,
+          phoneText: '未登录',
+          rows: [],
+          memberName: '会员中心',
+        });
+        return;
+      }
+      this.setData({ error: error.message || '网络异常' });
       toast(error.message);
     }
   },
@@ -46,6 +63,8 @@ Page({
     if (tab) wx.switchTab({ url });
     else wx.navigateTo({ url });
   },
+
+  goAuth() { wx.navigateTo({ url: '/pages/auth/auth' }); },
 
   callStore() { getApp().callStore(); },
 
@@ -75,9 +94,11 @@ Page({
       await request('/api/auth/logout', { method: 'POST' });
     } catch (_) { /* local clear still needed */ }
     getApp().clearSession();
+    getApp().clearCart();
+    wx.setStorageSync('ruyiLoggedOut', 1);
     toast('已退出登录');
-    this.setData({ user: null, phoneText: '', rows: [] });
-    wx.reLaunch({ url: '/pages/home/home' });
+    this.setData({ user: null, phoneText: '未登录', rows: [], loggedOut: true });
+    wx.switchTab({ url: '/pages/home/home' });
   },
 
   deleteAccount() {
@@ -92,8 +113,9 @@ Page({
           await request('/api/me', { method: 'DELETE' });
           getApp().clearSession();
           getApp().clearCart();
+          wx.removeStorageSync('ruyiLoggedOut');
           toast('账号已注销');
-          wx.reLaunch({ url: '/pages/home/home' });
+          wx.switchTab({ url: '/pages/home/home' });
         } catch (error) {
           toast(error.message);
         }

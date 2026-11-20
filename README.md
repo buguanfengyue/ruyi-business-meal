@@ -50,7 +50,7 @@ npm run dev
 | GET | `/api/coupons?status=` | 券包 |
 | POST | `/api/coupons/:id/gift` · `/api/coupons/redeem` | 转赠 / 兑换码领取 |
 | GET | `/api/membership` · `/api/points` | 会员等级 · 积分明细 |
-| GET | `/api/invite` · `/api/partner` | 推荐朋友 · 共享合伙人 |
+| GET | `/api/invite` · `/api/partner` | 推荐朋友 · 共享合伙人（服务端保留；小程序合伙人页已下线，入口以邀请页为准） |
 | GET / POST / DELETE | `/api/addresses[/:id]` | 收货地址 |
 
 ### 商户接口（`Authorization: Bearer <管理员 token>`）

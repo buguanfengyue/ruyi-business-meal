@@ -23,6 +23,7 @@ function loadCjs(file) {
   return module.exports;
 }
 
+process.env.STORE_HOURS = '00:00-24:00';
 const server = createApp({ config: loadConfig({ DATABASE_PATH: ':memory:', WECHAT_AUTH_MODE: 'mock' }), logger: { log() {}, warn() {}, error: console.error } });
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const apiBase = `http://127.0.0.1:${server.address().port}`;
@@ -53,7 +54,13 @@ globalThis.wx = {
   stopPullDownRefresh: () => {},
   makePhoneCall: ({ phoneNumber }) => log.push(['call', phoneNumber]),
   requestPayment: () => { throw new Error('mock mode must not call wx.requestPayment'); },
+  showShareMenu: () => {},
+  previewImage: ({ urls }) => log.push(['preview', urls && urls[0]]),
+  chooseAddress: ({ fail }) => fail({ errMsg: 'chooseAddress:fail cancel' }),
+  removeStorageSync: (k) => { delete storage[k]; },
+  reLaunch: ({ url }) => log.push(['reLaunch', url]),
 };
+globalThis.getCurrentPages = () => [];
 let app;
 const pages = {};
 let current;
@@ -77,7 +84,7 @@ function page(name) {
 loadCjs(path.join(root, 'app.js'));
 app.onLaunch({ query: {} });
 app.globalData.apiBase = apiBase;
-for (const p of ['home', 'menu', 'checkout', 'orders', 'order-detail', 'me', 'coupons', 'addresses', 'info', 'auth', 'member', 'partner', 'invite', 'points', 'bookings']) {
+for (const p of ['home', 'menu', 'checkout', 'orders', 'order-detail', 'me', 'coupons', 'addresses', 'info', 'auth', 'member', 'invite', 'points', 'bookings']) {
   current = p;
   loadCjs(path.join(root, 'pages', p, `${p}.js`));
 }
@@ -94,10 +101,12 @@ try {
   await menu.onLoad();
   assert.equal(menu.data.list.length, 3);
   menu.pickCat(ev({ id: 'soup' })); assert.equal(menu.data.list.length, 1);
-  menu.onSearch(ev({}, '58元')); assert.equal(menu.data.list.length, 1);
-  menu.onSearch(ev({}, ''));
+  menu.onSearch(ev({}, '58元')); await wait(200); assert.equal(menu.data.list.length, 1);
+  menu.onSearch(ev({}, '')); await wait(200);
   menu.add(ev({ id: 'a' })); menu.add(ev({ id: 'a' })); menu.add(ev({ id: 'd' }));
   assert.equal(menu.data.count, 3);
+  assert.equal(menu.data.qtyMap.a, 2);
+  assert.ok(typeof menu.onShareAppMessage().path === 'string');
   menu.goCheckout(); assert.equal(menu.data.showRegister, true, '未注册用户应弹出注册');
   menu.onNickname(ev({}, '小程序用户'));
   await menu.register();
@@ -118,7 +127,10 @@ try {
   assert.equal(checkout.data.quote.totalText, '101.92');
   assert.ok(checkout.data.addressId, '自动选中地址');
   assert.equal(checkout.data.couponText, '2张可用');
-  tapIndex = 1; checkout.chooseCoupon(); tapIndex = 0; await wait(200);
+  checkout.chooseCoupon();
+  assert.equal(checkout.data.showCoupons, true);
+  checkout.pickCoupon(ev({ id: checkout.data.coupons[0].id }));
+  await wait(200);
   assert.equal(checkout.data.quote.totalText, '91.92');
   checkout.onSchedule({ detail: { value: '2' } });
   await checkout.submit();
@@ -130,14 +142,54 @@ try {
   const detail = page('order-detail');
   detail.onLoad({ id: orderId }); await wait();
   assert.equal(detail.data.order.canPay, true);
+  assert.ok(detail.data.order.payLabel.includes('去支付') || detail.data.order.payLabel === '提交订单');
   await detail.pay();
   assert.equal(detail.data.order.status, 'paid');
-  detail.callStore(); assert.deepEqual(log.at(-1), ['call', '15805320100']);
+  tapIndex = 0;
+  detail.contactMerchant(); assert.deepEqual(log.at(-1), ['call', '15805320100']);
+  tapIndex = 1;
+  detail.contactMerchant(); assert.deepEqual(log.at(-1), ['navigateTo', '/pages/info/info?kind=wechat']);
+
+  const info = page('info');
+  info.onLoad({ kind: 'wechat' });
+  info.previewQr();
+  assert.deepEqual(log.at(-1), ['preview', '/images/ui/boss-wechat-qr.jpg']);
 
   const me = page('me');
   await me.load();
   assert.equal(me.data.user.nickname, '小程序用户');
   assert.equal(me.data.memberName, '白银会员');
+
+  // Logout must stick (ruyiLoggedOut) and clear the cart.
+  await me.logout();
+  assert.equal(storage.ruyiLoggedOut, 1);
+  assert.deepEqual(app.globalData.cart, {});
+  assert.equal(app.globalData.token, '');
+  await me.load();
+  assert.equal(me.data.loggedOut, true);
+  // Guest home must populate bootstrapCache so the next login can prove invalidation.
+  const guestHome = page('home');
+  await guestHome.load();
+  assert.ok(app.globalData.bootstrapCache);
+  assert.equal(guestHome.data.user, null);
+  // Explicit login from auth page clears the flag and guest cache.
+  const auth = page('auth');
+  await auth.login();
+  assert.equal(storage.ruyiLoggedOut, undefined);
+  assert.ok(app.globalData.token);
+  assert.equal(app.globalData.bootstrapCache, null);
+  const homeAfterLogin = page('home');
+  await homeAfterLogin.load();
+  assert.ok(homeAfterLogin.data.user && homeAfterLogin.data.user.id);
+
+  const ordersLoggedOut = page('orders');
+  storage.ruyiLoggedOut = 1;
+  app.globalData.token = '';
+  app.globalData.user = null;
+  await ordersLoggedOut.load();
+  assert.equal(ordersLoggedOut.data.needLogin, true);
+  storage.ruyiLoggedOut = undefined;
+  await auth.login();
 
   const member = page('member');
   await member.load();
@@ -152,7 +204,11 @@ try {
   const coupons = page('coupons');
   coupons.onLoad({}); await coupons.onShow();
   assert.equal(coupons.data.list.length, 1);
-  coupons.gift(); await wait(300);
+  coupons.gift();
+  assert.equal(coupons.data.showGiftPick, true);
+  assert.ok(coupons.data.giftOptions.length);
+  await coupons.pickGift(ev({ id: coupons.data.giftOptions[0].id }));
+  await wait(200);
   const giftCode = coupons.data.giftCode;
   assert.ok(giftCode);
   assert.equal(coupons.onShareAppMessage({}).path, `/pages/coupons/coupons?claim=${giftCode}`);
@@ -160,6 +216,8 @@ try {
   const invite = page('invite');
   await invite.onShow();
   assert.equal(invite.onShareAppMessage().path, '/pages/home/home?inviter=demo-user');
+  const homeShare = page('home');
+  assert.equal(homeShare.onShareAppMessage({ from: 'button', target: { dataset: { share: 'invite' } } }).path, '/pages/home/home?inviter=demo-user');
 
   // A friend opens the share card (hot start with ?inviter) and claims the gift.
   app.globalData.token = '';
@@ -175,9 +233,10 @@ try {
   // Back to the first user; an expired token re-logins transparently.
   loginCode = 'harness-code';
   app.globalData.token = 'ruyi_expired';
-  const partner = page('partner');
-  await partner.onShow();
-  assert.equal(partner.data.data.invited.length, 1);
+  const inviteAgain = page('invite');
+  await inviteAgain.onShow();
+  assert.equal(inviteAgain.data.data.invited.length, 1);
+  assert.ok(inviteAgain.onShareAppMessage().path.includes('inviter='));
   const bookings = page('bookings');
   await bookings.onShow();
   assert.equal(bookings.data.orders.length, 1);

@@ -26,3 +26,7 @@ page { background: #fff; padding-bottom: 180rpx; }
 .code { font-size: 52rpx; font-weight: 800; letter-spacing: 8rpx; color: #d91e26; margin: 28rpx 0; }
 .d-link { color: #999; padding-top: 24rpx; font-size: 26rpx; }
 .code-input { border: 1rpx solid #eee; border-radius: 10rpx; height: 88rpx; margin: 20rpx 0 32rpx; text-align: left; padding: 0 24rpx; }
+.gift-sheet { position: absolute; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 24rpx 24rpx 0 0; padding: 28rpx 28rpx calc(28rpx + env(safe-area-inset-bottom)); max-height: 70vh; display: flex; flex-direction: column; }
+.sheet-title { font-size: 32rpx; font-weight: 700; margin-bottom: 16rpx; }
+.gift-list { max-height: 55vh; }
+.gift-row { padding: 28rpx 8rpx; border-bottom: 1rpx solid #f0f0f0; font-size: 28rpx; }

@@ -7,7 +7,8 @@ import { loadConfig } from '../server/config.mjs';
 import { createApp } from '../server/app.mjs';
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruyi-admin-test-'));
-const env = { DATABASE_PATH: path.join(dir, 'ruyi.db'), WECHAT_AUTH_MODE: 'mock', SEED_DEMO: '0', ADMIN_USERNAME: 'boss', ADMIN_PASSWORD: 'correct-horse-1' };
+const env = { DATABASE_PATH: path.join(dir, 'ruyi.db'), WECHAT_AUTH_MODE: 'mock', SEED_DEMO: '0', ADMIN_USERNAME: 'boss', ADMIN_PASSWORD: 'correct-horse-1', STORE_HOURS: '00:00-24:00' };
+process.env.STORE_HOURS = env.STORE_HOURS;
 const quiet = { log() {}, warn() {}, error: console.error };
 
 async function start() {
@@ -36,6 +37,10 @@ try {
   const login = await request('/api/admin/login', { method: 'POST', body: { username: 'boss', password: 'correct-horse-1' } });
   assert.equal(login.status, 200);
   const admin = login.body.token;
+
+  // STORE_HOURS=00:00-24:00 is set for this process, but seeded DB hours must stay fixed.
+  const seededStore = (await request('/api/admin/settings', { token: admin })).body.settings;
+  assert.deepEqual(seededStore.store.hours, { open: '10:00', close: '20:00' }, 'STORE_HOURS 不得写入种子');
 
   /* a customer places and pays an order */
   const alice = (await request('/api/auth/login', { method: 'POST', body: { code: 'mock:alice' } })).body.session.token;

@@ -11,6 +11,7 @@ App({
     // Set when the app is opened from a friend's invite share.
     inviterId: '',
     storePhone: '15805320100',
+    bootstrapCache: null,
   },
 
   onLaunch(options) {
@@ -18,6 +19,7 @@ App({
     this.globalData.token = wx.getStorageSync('ruyiToken') || '';
     this.globalData.user = wx.getStorageSync('ruyiUser') || null;
     this.globalData.cart = wx.getStorageSync('ruyiCart') || {};
+    wx.showShareMenu({ withShareTicket: true, menus: ['shareAppMessage', 'shareTimeline'] });
   },
 
   onShow(options) {
@@ -33,13 +35,22 @@ App({
   },
 
   setUser(user) {
+    const prev = this.globalData.user;
+    const changed = !prev || !user
+      || prev.id !== user.id
+      || prev.phone !== user.phone
+      || prev.registered !== user.registered
+      || (prev.member && prev.member.level) !== (user.member && user.member.level);
     this.globalData.user = user;
     wx.setStorageSync('ruyiUser', user);
+    // Drop guest/stale bootstrap so home/menu see the new identity immediately.
+    if (changed) this.globalData.bootstrapCache = null;
   },
 
   clearSession() {
     this.globalData.token = '';
     this.globalData.user = null;
+    this.globalData.bootstrapCache = null;
     wx.removeStorageSync('ruyiToken');
     wx.removeStorageSync('ruyiUser');
   },

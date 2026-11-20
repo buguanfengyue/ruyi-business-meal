@@ -14,3 +14,8 @@
 .big { font-size: 40rpx; font-weight: 700; }
 .confirm { height: 112rpx; line-height: 112rpx; width: 250rpx; text-align: center; background: #d91e26; color: #fff; font-size: 32rpx; }
 .confirm.disabled { opacity: .6; }
+.coupon-sheet { position: absolute; left: 0; right: 0; bottom: 0; background: #fff; border-radius: 24rpx 24rpx 0 0; padding: 28rpx 28rpx calc(28rpx + env(safe-area-inset-bottom)); max-height: 70vh; display: flex; flex-direction: column; }
+.sheet-title { font-size: 32rpx; font-weight: 700; margin-bottom: 16rpx; }
+.coupon-list { max-height: 55vh; }
+.coupon-row { padding: 28rpx 8rpx; border-bottom: 1rpx solid #f0f0f0; }
+.coupon-row.on { color: #d91e26; }

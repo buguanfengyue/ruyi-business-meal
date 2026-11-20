@@ -5,7 +5,7 @@
   </view>
   <view class="account" bindtap="goMe">
     <image class="avatar" src="/images/ui/avatar-default.png" mode="aspectFill" />
-    <view class="account-main"><view class="bold">{{user.registered ? user.nickname : '未授权'}}</view><view>{{phoneText}}</view></view>
+    <view class="account-main"><view class="bold">{{user.registered ? user.nickname : (user ? '未授权' : '未登录')}}</view><view>{{phoneText}}</view></view>
     <view class="metric"><view class="bold">{{user.availableCoupons || 0}}</view><view>可用券</view></view>
   </view>
 </view>
@@ -18,11 +18,12 @@
       <image class="icon-img" src="/images/ui/boss-wechat-qr.jpg" mode="aspectFill" />
       <text class="bold">老板微信</text>
     </view>
-    <view class="feature" data-url="/pages/invite/invite" bindtap="goPage">
+    <!-- open-type="share" 直接打开微信「选择发送给谁」面板 -->
+    <button class="feature share-feature" open-type="share" data-share="invite">
       <image class="icon-img" src="/images/ui/invite.png" mode="aspectFit" />
       <text class="bold">推荐朋友</text>
-      <text class="tiny">INVITE</text>
-    </view>
+      <text class="tiny">分享到微信</text>
+    </button>
     <view class="feature" bindtap="callStore">
       <image class="icon-img" src="/images/ui/call-store.png" mode="aspectFit" />
       <text class="bold">订餐电话</text>
@@ -34,5 +35,9 @@
       <text class="tiny">POINTS</text>
     </view>
   </view>
-  <image class="banner-img" src="/images/ui/invite-banner.jpg" mode="aspectFill" />
+  <view class="banner-wrap">
+    <image class="banner-img" src="/images/ui/invite-banner.jpg" mode="aspectFill" />
+    <button class="banner-share" open-type="share" data-share="invite">邀请好友</button>
+    <view class="banner-link" bindtap="goInvitePage">查看邀请奖励 ›</view>
+  </view>
 </view>

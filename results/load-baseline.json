@@ -1,0 +1,35 @@
+{
+  "at": "2026-11-20T07:02:27.822Z",
+  "scenarios": [
+    {
+      "label": "S0 sequential reads",
+      "n": 80,
+      "ok": 80,
+      "fail": 0,
+      "p50": 0.3,
+      "p95": 1.4,
+      "p99": 2.9,
+      "max": 2.9
+    },
+    {
+      "label": "S1-ish 300 concurrent GET /api/products",
+      "n": 300,
+      "ok": 300,
+      "fail": 0,
+      "p50": 24,
+      "p95": 56,
+      "p99": 56.9,
+      "max": 57.2
+    },
+    {
+      "label": "S3-ish 10 VU × 5 quote/order/pay",
+      "n": 150,
+      "ok": 150,
+      "fail": 0,
+      "p50": 1.5,
+      "p95": 11.7,
+      "p99": 12.2,
+      "max": 12.3
+    }
+  ]
+}

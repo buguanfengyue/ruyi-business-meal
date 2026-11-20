@@ -3,13 +3,18 @@ import { spawn } from 'node:child_process';
 import { setTimeout as wait } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { parseStoreHours } from '../server/data.mjs';
+
+assert.deepEqual(parseStoreHours('99:99-88:88', { warn() {} }), { open: '10:00', close: '20:00' });
+assert.deepEqual(parseStoreHours('20:00-10:00', { warn() {} }), { open: '10:00', close: '20:00' });
+assert.deepEqual(parseStoreHours('00:00-24:00', { warn() {} }), { open: '00:00', close: '24:00' });
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const port = 8788;
 const base = `http://127.0.0.1:${port}`;
 const child = spawn(process.execPath, ['server/index.mjs'], {
   cwd: root,
-  env: { ...process.env, DATABASE_PATH: ':memory:', RUYI_API_PORT: String(port) },
+    env: { ...process.env, DATABASE_PATH: ':memory:', RUYI_API_PORT: String(port), STORE_HOURS: '00:00-24:00' },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
 

@@ -9,6 +9,10 @@ try {
   process.exit(1);
 }
 
+if (process.env.NODE_ENV === 'production' && process.env.STORE_HOURS) {
+  console.warn('[ruyi-api] WARNING: STORE_HOURS is set in production and will be ignored. Remove it from the env file and confirm store hours in admin.');
+}
+
 const app = createApp({ config });
 app.listen(config.port, config.host, () => {
   console.log(`[ruyi-api] listening on http://${config.host}:${config.port} (auth=${config.auth.mode}, payment=${config.pay.mode}, db=${config.databasePath})`);

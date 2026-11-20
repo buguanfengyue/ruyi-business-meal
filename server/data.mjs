@@ -5,6 +5,27 @@
  * mini-program backend. The merchant replaces them through the admin API.
  */
 
+const OPEN_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+const CLOSE_RE = /^(24:00|([01]\d|2[0-3]):[0-5]\d)$/;
+
+/** Fixed seed hours — never read STORE_HOURS here (production first boot safety). */
+export const SEEDED_STORE_HOURS = { open: '10:00', close: '20:00' };
+
+/**
+ * Parse STORE_HOURS=HH:MM-HH:MM for non-production runtime overrides only.
+ * close may be 24:00; open must be earlier than close (same-day window).
+ */
+export function parseStoreHours(raw, { warn = console.warn } = {}) {
+  const value = String(raw ?? process.env.STORE_HOURS ?? '').trim();
+  if (!value) return { ...SEEDED_STORE_HOURS };
+  const [open, close] = value.split('-');
+  if (!OPEN_RE.test(open || '') || !CLOSE_RE.test(close || '') || open >= close) {
+    warn?.(`[ruyi-api] invalid STORE_HOURS="${value}", falling back to ${SEEDED_STORE_HOURS.open}-${SEEDED_STORE_HOURS.close}`);
+    return { ...SEEDED_STORE_HOURS };
+  }
+  return { open, close };
+}
+
 export const DEFAULT_SETTINGS = {
   store: {
     id: 'ruyi-store',
@@ -13,7 +34,7 @@ export const DEFAULT_SETTINGS = {
     distanceText: '',
     phone: '15805320100',
     fulfillmentModes: ['delivery'],
-    hours: { open: '10:00', close: '20:00' },
+    hours: { ...SEEDED_STORE_HOURS },
     accepting: true,
     notice: '',
   },
@@ -28,7 +49,7 @@ export const DEFAULT_SETTINGS = {
     inviter: { title: '10元邀新券', amount: 10, threshold: 100, validDays: 30, count: 1 },
   },
   partner: {
-    // Share of an invitee's completed order. 0 until the merchant sets it.
+    // Server-side partner settings retained; mini-program partner page is offline.
     commissionRate: 0,
     rules: '邀请好友注册并在本店消费后，可按设定比例获得单级邀请奖励。奖励规则以门店公示为准，提现需开通微信支付商家转账；未开通前仅记录佣金。详情请咨询店内人员。',
   },
@@ -54,7 +75,9 @@ export function seedDatabase(db, { demo = false, seedCatalog = demo, issueCoupon
   const now = new Date().toISOString();
   db.tx(() => {
     for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {
-      db.run('INSERT OR IGNORE INTO settings (key, value, updated_at) VALUES (:key, :value, :now)', { key, value: JSON.stringify(value), now });
+      // Always seed fixed hours — STORE_HOURS must not permanently alter production DB.
+      const payload = key === 'store' ? { ...value, hours: { ...SEEDED_STORE_HOURS } } : value;
+      db.run('INSERT OR IGNORE INTO settings (key, value, updated_at) VALUES (:key, :value, :now)', { key, value: JSON.stringify(payload), now });
     }
     // Catalog: local/mock convenience or explicit SEED_DEMO. Production wechat starts with empty menu for the merchant to import.
     if (seedCatalog && !db.one('SELECT 1 AS x FROM categories LIMIT 1')) {

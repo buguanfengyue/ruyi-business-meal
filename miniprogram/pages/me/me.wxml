@@ -1,9 +1,11 @@
-<view class="profile" bindtap="tapProfile">
+<view class="profile" bindtap="{{loggedOut ? 'goAuth' : 'tapProfile'}}">
   <image class="avatar" src="/images/ui/avatar-default.png" mode="aspectFill" />
-  <view class="profile-main"><view class="name">{{user.registered ? user.nickname : '未授权'}}</view><view class="label">{{phoneText}}</view></view>
-  <text wx:if="{{user && !user.registered}}" class="red hint">点击注册 ›</text>
+  <view class="profile-main"><view class="name">{{loggedOut ? '未登录' : (user.registered ? user.nickname : '未授权')}}</view><view class="label">{{phoneText}}</view></view>
+  <text wx:if="{{loggedOut}}" class="red hint">去登录 ›</text>
+  <text wx:elif="{{user && !user.registered}}" class="red hint">点击注册 ›</text>
 </view>
-<navigator class="member" url="/pages/member/member">
+<view wx:if="{{error}}" class="card error" bindtap="load">{{error}}（点击重试）</view>
+<navigator wx:if="{{!loggedOut}}" class="member" url="/pages/member/member">
   <view class="member-left">
     <image class="member-badge" src="/images/vip/badge.png" mode="aspectFit" />
     <text>{{memberName}}</text>
@@ -33,11 +35,11 @@
     <view class="row-left"><text>隐私政策</text></view>
     <text class="label">›</text>
   </navigator>
-  <view class="row" bindtap="logout">
+  <view wx:if="{{!loggedOut}}" class="row" bindtap="logout">
     <view class="row-left"><text>退出登录</text></view>
     <text class="label">›</text>
   </view>
-  <view class="row danger" bindtap="deleteAccount">
+  <view wx:if="{{!loggedOut}}" class="row danger" bindtap="deleteAccount">
     <view class="row-left"><text>注销账号</text></view>
     <text class="label">›</text>
   </view>

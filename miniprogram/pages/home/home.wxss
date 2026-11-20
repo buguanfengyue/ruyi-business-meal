@@ -15,7 +15,12 @@
 .delivery-title { font-size: 56rpx; font-weight: 700; letter-spacing: 6rpx; }
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24rpx; margin-top: 24rpx; }
 .feature { background: #fff; border-radius: 16rpx; box-shadow: 0 4rpx 14rpx rgba(0,0,0,.1); min-height: 190rpx; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10rpx; font-size: 28rpx; }
+.share-feature { margin: 0; padding: 0; line-height: inherit; border: none; color: inherit; font-weight: inherit; }
+.share-feature::after { border: none; }
 .icon-img { width: 72rpx; height: 72rpx; border-radius: 12rpx; }
 .tiny { font-size: 18rpx; color: #aaa; }
-.banner-img { display: block; margin: 44rpx -36rpx 0; width: calc(100% + 72rpx); height: 280rpx; }
-.tech { text-align: center; color: #aaa; font-size: 22rpx; padding: 50rpx 0; }
+.banner-wrap { position: relative; margin: 44rpx -36rpx 0; }
+.banner-img { display: block; width: 100%; height: 280rpx; }
+.banner-share { position: absolute; left: 50%; bottom: 88rpx; transform: translateX(-50%); margin: 0; padding: 0 48rpx; height: 72rpx; line-height: 72rpx; background: #07c160; color: #fff; border-radius: 36rpx; font-size: 30rpx; font-weight: 700; }
+.banner-share::after { border: none; }
+.banner-link { position: absolute; left: 0; right: 0; bottom: 24rpx; text-align: center; color: #fff; font-size: 24rpx; text-shadow: 0 2rpx 6rpx rgba(0,0,0,.35); }
