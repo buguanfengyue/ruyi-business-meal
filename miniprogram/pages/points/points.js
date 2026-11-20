@@ -1,21 +1,22 @@
 const { request } = require('../../utils/request');
-const { formatTime, toast } = require('../../utils/format');
+const { formatTime } = require('../../utils/format');
 const { isLoggedOutError, goLogin } = require('../../utils/auth');
 
 Page({
-  data: { data: null, needLogin: false, loading: true },
-  async onShow() {
+  data: { data: null, needLogin: false, loading: true, error: '' },
+  onShow() { return this.load(); },
+  async load() {
+    this.setData({ loading: true, error: '' });
     try {
       const data = await request('/api/points');
       data.records = data.records.map((r) => Object.assign({}, r, { timeText: formatTime(r.at) }));
-      this.setData({ data, needLogin: false, loading: false });
+      this.setData({ data, needLogin: false, loading: false, error: '' });
     } catch (error) {
       if (isLoggedOutError(error)) {
-        this.setData({ needLogin: true, data: null, loading: false });
+        this.setData({ needLogin: true, data: null, loading: false, error: '' });
         return;
       }
-      this.setData({ loading: false });
-      toast(error.message);
+      this.setData({ loading: false, error: error.message || '网络异常，请重试' });
     }
   },
   goAuth() { goLogin(); },

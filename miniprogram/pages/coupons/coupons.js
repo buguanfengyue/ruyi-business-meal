@@ -16,6 +16,7 @@ Page({
     code: '',
     giftCode: '',
     needLogin: false,
+    error: '',
     showGiftPick: false,
     giftOptions: [],
   },
@@ -40,15 +41,14 @@ Page({
         thresholdText: money(c.threshold),
         range: `${formatDateTime(c.validFrom)} - ${formatDateTime(c.validTo)}`,
       }));
-      this.setData({ all, loading: false, needLogin: false });
+      this.setData({ all, loading: false, needLogin: false, error: '' });
       this.filter();
     } catch (error) {
       if (isLoggedOutError(error)) {
-        this.setData({ loading: false, needLogin: true, all: [], list: [] });
+        this.setData({ loading: false, needLogin: true, all: [], list: [], error: '' });
         return;
       }
-      this.setData({ loading: false });
-      toast(error.message);
+      this.setData({ loading: false, error: error.message || '网络异常，请重试' });
     }
   },
 
@@ -121,7 +121,10 @@ Page({
         goLogin();
         return;
       }
+      // Deterministic client/business failures should not auto-retry forever.
+      if (error.status && error.status < 500 && this.claimCode === code) this.claimCode = '';
       toast(error.message);
     }
   },
 });
+

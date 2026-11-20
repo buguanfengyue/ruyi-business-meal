@@ -4,7 +4,9 @@ const { isLoggedOutError, goLogin } = require('../../utils/auth');
 
 Page({
   data: { orders: [], loading: true, needLogin: false },
-  async onShow() {
+  onShow() { return this.load(); },
+
+  async load() {
     try {
       const data = await request('/api/orders');
       const orders = data.orders

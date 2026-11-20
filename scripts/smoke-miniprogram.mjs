@@ -60,6 +60,7 @@ globalThis.wx = {
   removeStorageSync: (k) => { delete storage[k]; },
   reLaunch: ({ url }) => log.push(['reLaunch', url]),
 };
+globalThis.getCurrentPages = () => [];
 let app;
 const pages = {};
 let current;
@@ -83,7 +84,7 @@ function page(name) {
 loadCjs(path.join(root, 'app.js'));
 app.onLaunch({ query: {} });
 app.globalData.apiBase = apiBase;
-for (const p of ['home', 'menu', 'checkout', 'orders', 'order-detail', 'me', 'coupons', 'addresses', 'info', 'auth', 'member', 'partner', 'invite', 'points', 'bookings']) {
+for (const p of ['home', 'menu', 'checkout', 'orders', 'order-detail', 'me', 'coupons', 'addresses', 'info', 'auth', 'member', 'invite', 'points', 'bookings']) {
   current = p;
   loadCjs(path.join(root, 'pages', p, `${p}.js`));
 }
@@ -166,16 +167,29 @@ try {
   assert.equal(app.globalData.token, '');
   await me.load();
   assert.equal(me.data.loggedOut, true);
-  // Explicit login from auth page clears the flag.
+  // Guest home must populate bootstrapCache so the next login can prove invalidation.
+  const guestHome = page('home');
+  await guestHome.load();
+  assert.ok(app.globalData.bootstrapCache);
+  assert.equal(guestHome.data.user, null);
+  // Explicit login from auth page clears the flag and guest cache.
   const auth = page('auth');
   await auth.login();
   assert.equal(storage.ruyiLoggedOut, undefined);
   assert.ok(app.globalData.token);
-  // Login must invalidate guest bootstrap so home does not keep user=null for 45s.
   assert.equal(app.globalData.bootstrapCache, null);
   const homeAfterLogin = page('home');
   await homeAfterLogin.load();
   assert.ok(homeAfterLogin.data.user && homeAfterLogin.data.user.id);
+
+  const ordersLoggedOut = page('orders');
+  storage.ruyiLoggedOut = 1;
+  app.globalData.token = '';
+  app.globalData.user = null;
+  await ordersLoggedOut.load();
+  assert.equal(ordersLoggedOut.data.needLogin, true);
+  storage.ruyiLoggedOut = undefined;
+  await auth.login();
 
   const member = page('member');
   await member.load();
@@ -219,10 +233,10 @@ try {
   // Back to the first user; an expired token re-logins transparently.
   loginCode = 'harness-code';
   app.globalData.token = 'ruyi_expired';
-  const partner = page('partner');
-  await partner.onShow();
-  assert.equal(partner.data.data.invited.length, 1);
-  assert.ok(partner.onShareAppMessage().path.includes('inviter='));
+  const inviteAgain = page('invite');
+  await inviteAgain.onShow();
+  assert.equal(inviteAgain.data.data.invited.length, 1);
+  assert.ok(inviteAgain.onShareAppMessage().path.includes('inviter='));
   const bookings = page('bookings');
   await bookings.onShow();
   assert.equal(bookings.data.orders.length, 1);

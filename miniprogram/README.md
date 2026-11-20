@@ -13,7 +13,6 @@
 | `pages/order-detail` | 订单详情：模拟支付、取消、再来一单 |
 | `pages/me` | 我的（tabBar）：注册、会员、余额、各入口、联系商家 |
 | `pages/member` | 会员中心：白银/黄金/钻石等级卡、权益、开通条件、会员说明 |
-| `pages/partner` | 共享合伙人（我的分销 / 首页共享股东）：佣金、提现、邀请列表 |
 | `pages/invite` | 推荐朋友：邀新券说明，`open-type="share"` 分享带 `inviter` 参数 |
 | `pages/coupons` | 券包：可使用/已使用/不可用/已赠送，转赠（分享或兑换码）、兑换码领取 |
 | `pages/points` / `pages/bookings` | 我的积分、我的预约 |

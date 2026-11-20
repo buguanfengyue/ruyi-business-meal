@@ -31,7 +31,23 @@ Page({
 
   onLoad() { return this.load(); },
 
+  userKey(user) {
+    if (!user) return 'guest';
+    return [user.id, user.phone || '', user.registered ? 1 : 0, (user.member && user.member.level) || 0].join('|');
+  },
+
   onShow() {
+    if (this._reloadOnShow) {
+      this._reloadOnShow = false;
+      this.load().then(() => this.syncCart());
+      return;
+    }
+    const loggedOut = Boolean(wx.getStorageSync('ruyiLoggedOut'));
+    const key = this.userKey(loggedOut ? null : getApp().globalData.user);
+    if (this._userKey && this._userKey !== key) {
+      this.load().then(() => this.syncCart());
+      return;
+    }
     if (!this.data.loading && !this.data.error && this.data.products.length) this.syncCart();
   },
 
@@ -62,6 +78,7 @@ Page({
           cover: (p.imageUrl && String(p.imageUrl).trim()) || '/images/empty/goods.png',
         });
       });
+      this._userKey = this.userKey(user);
       this.setData({
         loading: false,
         store: data.store,
@@ -145,6 +162,7 @@ Page({
     if (this.data.storeClosed) return toast(this.data.store.notice || '门店暂停接单');
     if (wx.getStorageSync('ruyiLoggedOut') || !getApp().globalData.token) {
       this.setData({ showBag: false });
+      this._reloadOnShow = true;
       wx.navigateTo({ url: '/pages/auth/auth' });
       return;
     }

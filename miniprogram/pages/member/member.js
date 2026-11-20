@@ -1,15 +1,16 @@
 const { request } = require('../../utils/request');
-const { money, toast } = require('../../utils/format');
+const { money } = require('../../utils/format');
 const { isLoggedOutError, goLogin } = require('../../utils/auth');
 
 const CARD_IMAGES = ['/images/vip/silver.jpg', '/images/vip/gold.jpg', '/images/vip/diamond.jpg'];
 
 Page({
-  data: { loading: true, levels: [], current: 0, member: null, phoneBound: false, pointsRule: '', view: null, needLogin: false },
+  data: { loading: true, levels: [], current: 0, member: null, phoneBound: false, pointsRule: '', view: null, needLogin: false, error: '' },
 
-  onShow() { this.load(); },
+  onShow() { return this.load(); },
 
   async load() {
+    this.setData({ loading: true, error: '' });
     try {
       const data = await request('/api/membership');
       const { member } = data;
@@ -20,16 +21,15 @@ Page({
         reached: member.level >= l.level,
         gapText: money(Math.max(0, l.minSpent - member.totalSpent)),
       }));
-      const current = this.data.loading || this.data.needLogin ? Math.max(0, member.level - 1) : this.data.current;
-      this.setData({ loading: false, needLogin: false, levels, member, phoneBound: data.phoneBound, pointsRule: data.pointsRule, spentText: money(member.totalSpent), current });
+      const current = this.data.loading || this.data.needLogin || this.data.error ? Math.max(0, member.level - 1) : this.data.current;
+      this.setData({ loading: false, needLogin: false, error: '', levels, member, phoneBound: data.phoneBound, pointsRule: data.pointsRule, spentText: money(member.totalSpent), current });
       this.pick(current);
     } catch (error) {
       if (isLoggedOutError(error)) {
-        this.setData({ loading: false, needLogin: true });
+        this.setData({ loading: false, needLogin: true, error: '' });
         return;
       }
-      this.setData({ loading: false });
-      toast(error.message);
+      this.setData({ loading: false, error: error.message || '网络异常，请重试' });
     }
   },
 

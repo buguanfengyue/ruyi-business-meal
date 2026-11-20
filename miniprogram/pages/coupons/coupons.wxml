@@ -7,6 +7,10 @@
     <view wx:for="{{tabs}}" wx:key="id" class="{{tab === item.id ? 'on' : ''}}" data-id="{{item.id}}" bindtap="pickTab">{{item.label}}</view>
   </view>
   <view wx:if="{{loading}}" class="empty">加载中…</view>
+  <view wx:elif="{{error}}" class="empty">
+    <view>{{error}}</view>
+    <button class="btn-red" bindtap="load">点击重试</button>
+  </view>
   <view wx:elif="{{!list.length}}" class="empty">
     <image class="empty-img" src="/images/empty/null.png" mode="aspectFit" />
     <view>暂无优惠券</view>

@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { parseStoreHours } from './data.mjs';
 import { httpError, str, validPhone } from './http.mjs';
 
 export const yuan = (fen) => Math.round(Number(fen || 0)) / 100;
@@ -321,10 +322,16 @@ export function createServices({ db, config }) {
   function assertStoreOpen() {
     const store = getSetting('store');
     if (!store.accepting) throw httpError(409, 'STORE_CLOSED', store.notice || '门店暂停接单，请稍后再来');
-    // STORE_HOURS overrides DB hours for tests / overnight local debugging only.
-    const hours = process.env.STORE_HOURS
-      ? (() => { const [open, close] = String(process.env.STORE_HOURS).split('-'); return { open, close }; })()
-      : (store.hours || {});
+    // STORE_HOURS is a local/test override only — never honor it in production.
+    const raw = process.env.STORE_HOURS;
+    let hours = store.hours || {};
+    if (raw) {
+      if (process.env.NODE_ENV === 'production') {
+        console.warn('[ruyi-api] STORE_HOURS is set in production and will be ignored');
+      } else {
+        hours = parseStoreHours(raw);
+      }
+    }
     const { open = '00:00', close = '24:00' } = hours;
     const { time } = localParts();
     const inHours = open <= close ? time >= open && time < close : time >= open || time < close;

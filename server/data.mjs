@@ -5,10 +5,18 @@
  * mini-program backend. The merchant replaces them through the admin API.
  */
 
-/** Parse STORE_HOURS=HH:MM-HH:MM (close may be 24:00). Used by seed + test overrides. */
-export function parseStoreHours(raw = process.env.STORE_HOURS || '10:00-20:00') {
-  const [open, close] = String(raw).split('-');
-  return { open: open || '10:00', close: close || '20:00' };
+const STORE_HOURS_RE = /^\d{2}:\d{2}-\d{2}:\d{2}$/;
+const DEFAULT_STORE_HOURS = { open: '10:00', close: '20:00' };
+
+/** Parse STORE_HOURS=HH:MM-HH:MM (close may be 24:00). Invalid input falls back to defaults. */
+export function parseStoreHours(raw = process.env.STORE_HOURS || '10:00-20:00', { warn = console.warn } = {}) {
+  const value = String(raw || '').trim();
+  if (!STORE_HOURS_RE.test(value)) {
+    warn?.(`[ruyi-api] invalid STORE_HOURS="${value}", falling back to ${DEFAULT_STORE_HOURS.open}-${DEFAULT_STORE_HOURS.close}`);
+    return { ...DEFAULT_STORE_HOURS };
+  }
+  const [open, close] = value.split('-');
+  return { open, close };
 }
 
 export const DEFAULT_SETTINGS = {

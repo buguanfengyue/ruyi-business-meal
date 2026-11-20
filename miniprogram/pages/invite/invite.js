@@ -1,5 +1,5 @@
 const { request } = require('../../utils/request');
-const { money, formatTime, toast } = require('../../utils/format');
+const { money, formatTime } = require('../../utils/format');
 const { inviteShareMessage } = require('../../utils/share');
 const { isLoggedOutError, goLogin } = require('../../utils/auth');
 
@@ -7,23 +7,25 @@ const present = (rows) => rows.map((r) => Object.assign({}, r, { commissionText:
 const reward = (r) => Object.assign({}, r, { amountText: money(r.amount), thresholdText: money(r.threshold) });
 
 Page({
-  data: { data: null, tab: 0, rows: [], needLogin: false, loading: true },
+  data: { data: null, tab: 0, rows: [], needLogin: false, loading: true, error: '' },
 
-  async onShow() {
+  onShow() { return this.load(); },
+
+  async load() {
+    this.setData({ loading: true, error: '' });
     try {
       const data = await request('/api/invite');
       data.newUserReward = reward(data.newUserReward);
       data.inviterReward = reward(data.inviterReward);
       data.invited = present(data.invited);
       data.invalid = present(data.invalid);
-      this.setData({ data, rows: this.data.tab === 0 ? data.invited : data.invalid, needLogin: false, loading: false });
+      this.setData({ data, rows: this.data.tab === 0 ? data.invited : data.invalid, needLogin: false, loading: false, error: '' });
     } catch (error) {
       if (isLoggedOutError(error)) {
-        this.setData({ needLogin: true, data: null, loading: false });
+        this.setData({ needLogin: true, data: null, loading: false, error: '' });
         return;
       }
-      this.setData({ loading: false });
-      toast(error.message);
+      this.setData({ loading: false, error: error.message || '网络异常，请重试' });
     }
   },
 

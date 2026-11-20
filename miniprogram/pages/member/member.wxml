@@ -3,6 +3,10 @@
   <button class="btn-red" bindtap="goAuth">去登录</button>
 </view>
 <view wx:elif="{{loading}}" class="empty">加载中…</view>
+<view wx:elif="{{error}}" class="empty">
+  <view>{{error}}</view>
+  <button class="btn-red" bindtap="load">点击重试</button>
+</view>
 <block wx:else>
   <swiper class="cards" current="{{current}}" previous-margin="44rpx" next-margin="44rpx" bindchange="onSwipe">
     <swiper-item wx:for="{{levels}}" wx:key="level">

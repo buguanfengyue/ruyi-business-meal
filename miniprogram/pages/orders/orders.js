@@ -1,5 +1,6 @@
 const { request, ensureLogin } = require('../../utils/request');
 const { money, formatTime } = require('../../utils/format');
+const { isLoggedOutError, goLogin } = require('../../utils/auth');
 
 Page({
   data: {
@@ -16,11 +17,12 @@ Page({
     filtered: [],
     loading: true,
     error: '',
+    needLogin: false,
   },
 
-  onShow() { this.load(); },
+  onShow() { return this.load(); },
 
-  onPullDownRefresh() { this.load().finally(() => wx.stopPullDownRefresh()); },
+  onPullDownRefresh() { return this.load().finally(() => wx.stopPullDownRefresh()); },
 
   async load() {
     try {
@@ -32,12 +34,18 @@ Page({
         totalText: money(o.totals.total),
         timeText: formatTime(o.createdAt),
       }));
-      this.setData({ orders, loading: false, error: '' });
+      this.setData({ orders, loading: false, error: '', needLogin: false });
       this.applyFilter();
     } catch (error) {
+      if (isLoggedOutError(error)) {
+        this.setData({ loading: false, needLogin: true, orders: [], filtered: [], error: '' });
+        return;
+      }
       this.setData({ loading: false, error: error.message });
     }
   },
+
+  goAuth() { goLogin(); },
 
   applyFilter() {
     const tab = this.data.tabs[this.data.active];
