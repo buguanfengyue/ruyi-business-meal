@@ -319,6 +319,8 @@ export function createServices({ db, config }) {
     return row;
   }
 
+  let warnedStoreHoursInProduction = false;
+
   function assertStoreOpen() {
     const store = getSetting('store');
     if (!store.accepting) throw httpError(409, 'STORE_CLOSED', store.notice || '门店暂停接单，请稍后再来');
@@ -327,7 +329,10 @@ export function createServices({ db, config }) {
     let hours = store.hours || {};
     if (raw) {
       if (process.env.NODE_ENV === 'production') {
-        console.warn('[ruyi-api] STORE_HOURS is set in production and will be ignored');
+        if (!warnedStoreHoursInProduction) {
+          warnedStoreHoursInProduction = true;
+          console.warn('[ruyi-api] STORE_HOURS is set in production and will be ignored (using DB store.hours)');
+        }
       } else {
         hours = parseStoreHours(raw);
       }
