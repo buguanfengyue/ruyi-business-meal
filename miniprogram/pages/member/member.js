@@ -10,7 +10,9 @@ Page({
   onShow() { return this.load(); },
 
   async load() {
-    this.setData({ loading: true, error: '' });
+    const firstLoad = !this._loadedOnce;
+    if (firstLoad) this.setData({ loading: true, error: '' });
+    else this.setData({ error: '' });
     try {
       const data = await request('/api/membership');
       const { member } = data;
@@ -21,11 +23,15 @@ Page({
         reached: member.level >= l.level,
         gapText: money(Math.max(0, l.minSpent - member.totalSpent)),
       }));
-      const current = this.data.loading || this.data.needLogin || this.data.error ? Math.max(0, member.level - 1) : this.data.current;
+      const current = firstLoad || this.data.needLogin || this.data.error
+        ? Math.max(0, member.level - 1)
+        : this.data.current;
+      this._loadedOnce = true;
       this.setData({ loading: false, needLogin: false, error: '', levels, member, phoneBound: data.phoneBound, pointsRule: data.pointsRule, spentText: money(member.totalSpent), current });
       this.pick(current);
     } catch (error) {
       if (isLoggedOutError(error)) {
+        this._loadedOnce = false;
         this.setData({ loading: false, needLogin: true, error: '' });
         return;
       }

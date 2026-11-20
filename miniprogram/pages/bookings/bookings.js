@@ -1,25 +1,26 @@
 const { request } = require('../../utils/request');
-const { money, formatTime, toast } = require('../../utils/format');
+const { money, formatTime } = require('../../utils/format');
 const { isLoggedOutError, goLogin } = require('../../utils/auth');
 
 Page({
-  data: { orders: [], loading: true, needLogin: false },
+  data: { orders: [], loading: true, needLogin: false, error: '' },
   onShow() { return this.load(); },
 
   async load() {
+    if (!this.data.orders.length && !this.data.error) this.setData({ loading: true, error: '' });
+    else this.setData({ error: '' });
     try {
       const data = await request('/api/orders');
       const orders = data.orders
         .filter((o) => o.schedule && o.schedule !== '尽快送达' && o.schedule !== '立即取单' && o.status !== 'cancelled')
         .map((o) => Object.assign({}, o, { summary: o.items.map((i) => `${i.name}×${i.quantity}`).join('、'), totalText: money(o.totals.total), timeText: formatTime(o.createdAt) }));
-      this.setData({ orders, loading: false, needLogin: false });
+      this.setData({ orders, loading: false, needLogin: false, error: '' });
     } catch (error) {
       if (isLoggedOutError(error)) {
-        this.setData({ loading: false, needLogin: true, orders: [] });
+        this.setData({ loading: false, needLogin: true, orders: [], error: '' });
         return;
       }
-      this.setData({ loading: false });
-      toast(error.message);
+      this.setData({ loading: false, error: error.message || '网络异常，请重试' });
     }
   },
   goAuth() { goLogin(); },

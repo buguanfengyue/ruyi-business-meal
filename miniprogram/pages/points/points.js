@@ -6,7 +6,8 @@ Page({
   data: { data: null, needLogin: false, loading: true, error: '' },
   onShow() { return this.load(); },
   async load() {
-    this.setData({ loading: true, error: '' });
+    if (!this.data.data) this.setData({ loading: true, error: '' });
+    else this.setData({ error: '' });
     try {
       const data = await request('/api/points');
       data.records = data.records.map((r) => Object.assign({}, r, { timeText: formatTime(r.at) }));

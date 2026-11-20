@@ -76,6 +76,7 @@ const SETTING_VALIDATORS = {
     const open = str(v.hours?.open, 5) || '00:00';
     const close = str(v.hours?.close, 5) || '24:00';
     if (!HHMM.test(open) || !HHMM.test(close)) throw httpError(400, 'INVALID_FIELD', '营业时间格式应为 HH:MM');
+    if (open >= close) throw httpError(400, 'INVALID_FIELD', '营业开始时间须早于结束时间（暂不支持跨夜，结束可用 24:00）');
     const name = str(v.name, 40);
     if (!name) throw httpError(400, 'INVALID_FIELD', '门店名称不能为空');
     return { id: 'ruyi-store', name, phone, distanceText: str(v.distanceText, 40), fulfillmentModes: ['delivery'], hours: { open, close }, accepting: bool(v.accepting ?? true), notice: str(v.notice, 100) };

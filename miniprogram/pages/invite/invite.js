@@ -12,7 +12,8 @@ Page({
   onShow() { return this.load(); },
 
   async load() {
-    this.setData({ loading: true, error: '' });
+    if (!this.data.data) this.setData({ loading: true, error: '' });
+    else this.setData({ error: '' });
     try {
       const data = await request('/api/invite');
       data.newUserReward = reward(data.newUserReward);
